@@ -55,7 +55,7 @@ export default function BoardLayout({
         {winner ? (
           <div className="flex flex-no-wrap">
             <h1 className="z-10 bg-red-700 text-white m-2 font-medium text-center text-xl md:text-2x p-4 rounded">
-              {t("playerId:winner-board.winner")} {winner.data().name}
+              {t("playerId:winner-board.winner")} {winner.name}
             </h1>
             {discardPile}
           </div>

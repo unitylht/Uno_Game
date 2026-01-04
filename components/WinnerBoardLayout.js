@@ -10,7 +10,9 @@ export default function WinnerBoardLayout({
 }) {
   const { t } = useTranslation();
   const currentPlayer = players.find((player) => player.id == currentPlayerId);
-  const indexCurrentPlayer = players.indexOf(currentPlayer);
+  const indexCurrentPlayer = currentPlayer
+    ? players.indexOf(currentPlayer)
+    : 0;
 
   return (
     <div
@@ -61,7 +63,7 @@ export default function WinnerBoardLayout({
         className={`row-start-3 col-span-3 md:row-start-2 md:col-start-2 md:col-span-1 lg:px-4 py-4 flex flex-col justify-center items-center`}
       >
         <h1 className="z-10 bg-red-700 text-white m-2 font-medium text-center text-xl md:text-2x p-4 rounded">
-          {t("playerId:winner-board.winner")} {winner.data().name}
+          {t("playerId:winner-board.winner")} {winner.name}
         </h1>
 
         <div className="m-4 w-full sm:w-1/2 flex justify-center">

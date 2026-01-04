@@ -30,7 +30,11 @@ export default function PlayerCards({
               key={card}
               className="-mx-4 lg:-mx-6  flex flex-col justify-center"
             >
-              <button onClick={() => onDiscardACard(card)} disabled>
+              <button
+                onClick={() => onDiscardACard(card)}
+                disabled={disabled}
+                className={disabled ? "opacity-50" : ""}
+              >
                 <Card
                   onRemove={onCardRemove}
                   onAdd={onCardAdd}
