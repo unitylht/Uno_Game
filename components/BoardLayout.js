@@ -14,62 +14,48 @@ export default function BoardLayout({
   const { t } = useTranslation();
   const currentPlayer = players.find((player) => player.id == currentPlayerId);
   const indexCurrentPlayer = players.indexOf(currentPlayer);
+  const orderedPlayers =
+    currentPlayer && indexCurrentPlayer >= 0
+      ? [
+          ...players.slice(indexCurrentPlayer),
+          ...players.slice(0, indexCurrentPlayer),
+        ]
+      : players;
 
   return (
     <div
-      className="grid-cols-3"
+      className="grid gap-4"
       style={{
-        display: "grid",
-        alignContent: "center",
-        gridTemplateRows: "auto auto 1fr auto",
+        gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+        alignContent: "start",
         width: "100%",
       }}
     >
-      {players.map((player, index) => {
+      <div className="col-span-full flex flex-col items-center justify-center">
+        {winner ? null : yellOneMessage}
+      </div>
+      {orderedPlayers.map((player) => {
         const isCurrentPlayer = player.id === currentPlayerId;
-        let positionPlayer;
-        players.length == 2
-          ? (positionPlayer = {
-              0: {
-                grid: "row-start-4 col-start-1 col-span-3",
-              },
-              1: {
-                grid: "row-start-1 col-start-2 col-span-1",
-              },
-            })
-          : (positionPlayer = {
-              0: {
-                grid: "row-start-4 col-start-1 col-span-3",
-              },
-              1: {
-                grid: "row-start-2 col-start-1 col-span-1",
-              },
-              2: {
-                grid: "row-start-1 col-start-2 col-span-1",
-              },
-              3: {
-                grid: "row-start-2 col-start-3 col-span-1",
-              },
-            });
-        const posPlayer =
-          (players.length - indexCurrentPlayer + index) % players.length;
-
         return (
           <div
             key={player.id}
-            className={`${positionPlayer[posPlayer].grid} flex flex-col items-center `}
+            className={`flex flex-col items-center p-4 rounded-lg border ${
+              isCurrentPlayer
+                ? "border-yellow-400 shadow-lg bg-white bg-opacity-25"
+                : "border-gray-600 bg-white bg-opacity-0"
+            }`}
           >
             {renderPlayer(player, isCurrentPlayer)}
           </div>
         );
       })}
       <div
-        className={`row-start-3 col-span-3 md:row-start-2 md:col-start-2 md:col-span-1 lg:px-20 py-4 flex flex-col justify-center items-center`}
+        className="col-span-full lg:px-20 py-4 flex flex-col justify-center items-center"
       >
         {winner ? (
           <div className="flex flex-no-wrap">
             <h1 className="z-10 bg-red-700 text-white m-2 font-medium text-center text-xl md:text-2x p-4 rounded">
-              {t("playerId:winner-board.winner")} {winner.data().name}
+              {t("playerId:winner-board.winner")} {winner.name}
             </h1>
             {discardPile}
           </div>
@@ -92,9 +78,6 @@ export default function BoardLayout({
             playerOptions
           )}
         </div>
-      </div>
-      <div className="row-start-1 col-start-1 col-span-3 flex flex-col items-center justify-center">
-        {winner ? null : yellOneMessage}
       </div>
     </div>
   );

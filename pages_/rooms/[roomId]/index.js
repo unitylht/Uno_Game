@@ -1,14 +1,12 @@
 import Layout from "~/components/Layout.js";
-import db from "~/utils/firebase";
 import { useRouter } from "next/router";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Button from "~/components/Button";
 import Main from "~/components/Main";
-import { isAllowedToThrow } from "~/utils/game";
 import Footer from "~/components/Footer";
 import useTranslation from "next-translate/useTranslation";
 import Router from "next-translate/Router";
-import getBaseUrl from "~/utils/getBaseUrl";
+import { fetchRoom, joinRoom } from "~/utils/apiClient";
 
 export default function Room() {
   const { t } = useTranslation();
@@ -18,41 +16,36 @@ export default function Room() {
   const [playerName, setPlayerName] = useState("");
   const [roomPlaying, setRoomPlaying] = useState(false);
   const [formAllowedToSubmit, setFormAllowedToSubmit] = useState(true);
-  // useEffect(() => {
   const onCreateRoom = (e) => {
     event.preventDefault();
     if (formAllowedToSubmit) {
       setFormAllowedToSubmit(false);
-      if (roomId) {
-        const roomRef = db.collection("rooms").doc(roomId);
-        Promise.all([roomRef.get(), roomRef.collection("players").get()]).then(
-          ([roomSnapshot, playersSnapshot]) => {
-            //hay veces que data es undefine ver de como manejarlo
-            if (
-              roomSnapshot.data().count > playersSnapshot.size &&
-              !roomSnapshot.data().playing
-            ) {
-              roomRef
-                .collection("players")
-                .add({ name: playerName, admin: false })
-                .then((playerRef) => {
-                  Router.pushI18n(
-                    "/rooms/[roomId]/players/[playerId]",
-                    `/rooms/${roomSnapshot.id}/players/${playerRef.id}`
-                  );
-                });
-            } else if (roomSnapshot.data().playing) {
-              setRoomPlaying(true);
-            } else {
-              setRoomIsFull(true);
-            }
+      if (!roomId) return;
+      fetchRoom(roomId).then(
+        ({ room }) => {
+          if (room.playing) {
+            setRoomPlaying(true);
+            return;
           }
-        );
-      }
+          if (room.players.length >= room.count) {
+            setRoomIsFull(true);
+            return;
+          }
+          joinRoom(roomId, playerName).then((response) => {
+            Router.pushI18n(
+              "/rooms/[roomId]/players/[playerId]",
+              `/rooms/${roomId}/players/${response.playerId}`
+            );
+            setFormAllowedToSubmit(true);
+          });
+        },
+        () => {
+          setRoomIsFull(true);
+          setFormAllowedToSubmit(true);
+        }
+      );
     }
   };
-
-  // , [roomId]);
 
   if (roomIsFull) {
     return (
@@ -104,7 +97,7 @@ export default function Room() {
                       color={"green"}
                       type={"submit"}
                       className="w-full"
-                      disabled={!isAllowedToThrow}
+                      disabled={false}
                     >
                       {t("roomId:join")}
                     </Button>

@@ -109,6 +109,7 @@ const standardDeck = [
   { special: "wild-drawFour" },
 ];
 
-// Use two full UNO decks (216 cards) to support large lobbies without
-// exhausting the draw pile too quickly.
-export const cards = [...standardDeck, ...standardDeck];
+// Two full UNO decks to support large lobbies.
+const cards = [...standardDeck, ...standardDeck];
+
+module.exports = { cards };

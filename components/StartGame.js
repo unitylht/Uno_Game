@@ -19,9 +19,7 @@ export default function StartGame({
       </Heading>
     );
   } else {
-    const winner = playersActive.find(
-      (player) => player.data().cards.length == 0
-    );
+    const winner = playersActive.find((player) => player.cards?.length == 0);
     return (
       <GameInProgress
         room={room}

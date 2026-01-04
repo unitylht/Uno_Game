@@ -1,92 +1,37 @@
 import Layout from "~/components/Layout.js";
 import { useRouter } from "next/router";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import db from "~/utils/firebase";
 import StartGame from "~/components/StartGame";
-import { takeACard, isWild, isWildDrawFour, isDrawTwo } from "~/utils/game";
 import Button from "~/components/Button";
 import Main from "~/components/Main";
 import Heading from "~/components/Heading";
 import Footer from "~/components/Footer";
 import useTranslation from "next-translate/useTranslation";
 import getBaseUrl from "~/utils/getBaseUrl";
+import useRoomSubscription from "~/hooks/useRoomSubscription";
+import { startRoomGame } from "~/utils/apiClient";
 
 export default function Game() {
   const { t } = useTranslation();
-  const [room, setRoom] = useState(null);
-  const [playersActive, setPlayersActive] = useState([]);
+  const [starting, setStarting] = useState(false);
   const router = useRouter();
   const roomId = router.query.roomId;
   const playerId = router.query.playerId;
-  // const link_jugadores = router.asPath;
+  const { room, players: playersActive } = useRoomSubscription(
+    roomId,
+    playerId
+  );
 
-  useEffect(() => {
-    if (roomId) {
-      const roomRef = db.collection("rooms").doc(roomId);
-
-      const roomUnsubscribe = roomRef.onSnapshot((roomRef) => {
-        setRoom(roomRef.data());
-      });
-
-      const playersUnsubscribe = roomRef
-        .collection("players")
-        .onSnapshot(function (querySnapshot) {
-          var players = [];
-
-          querySnapshot.forEach(function (doc) {
-            players.push(doc);
-          });
-          setPlayersActive(players);
-        });
-
-      return () => {
-        roomUnsubscribe();
-        playersUnsubscribe();
-      };
-    }
-  }, [roomId]);
-
-  const onNewGame = (e) => {
+  const onNewGame = async (event) => {
     event.preventDefault();
-    const roomRef = db.collection("rooms").doc(roomId);
-    let usedCards = {};
-    let firstCard = takeACard(usedCards);
-    //ver que pasa si la primera carta es reverse
-    while (isWild(firstCard)) {
-      usedCards = {};
-      firstCard = takeACard(usedCards);
+    if (!roomId || !playerId) return;
+    try {
+      setStarting(true);
+      await startRoomGame(roomId, playerId);
+    } finally {
+      setStarting(false);
     }
-    let drawCount = isDrawTwo(firstCard) ? 2 : 0;
-    playersActive.forEach((playerActive) => {
-      const cards = [];
-      for (var i = 1; i <= 7; i++) {
-        const card = takeACard(usedCards);
-        cards.push(card);
-      }
-
-      playerActive.ref.set(
-        {
-          cards: cards,
-        },
-        { merge: true }
-      );
-    });
-
-    roomRef.set(
-      {
-        playing: true,
-        discardPile: firstCard,
-        currentMove: 0,
-        deckDict: usedCards,
-        isReverse: false,
-        drawPile: false,
-        drawCount: drawCount,
-        yellOne: null,
-        pennalty: null,
-      },
-      { merge: true }
-    );
   };
 
   if (!room) {
@@ -120,7 +65,7 @@ export default function Game() {
         <li className="py-2 text-gray-700" key={i}>
           <div className="flex">
             <span className="flex-auto">
-              {player ? player.data().name : t("playerId:waiting-player")}
+              {player ? player.name : t("playerId:waiting-player")}
               {player && player.id === playerId ? t("playerId:you") : null}
             </span>
             {player ? <span>✅</span> : null}
@@ -128,6 +73,9 @@ export default function Game() {
         </li>
       );
     }
+
+    const currentPlayer = playersActive.find((p) => p.id === playerId);
+    const canStart = currentPlayer?.admin && playersActive.length === room.count;
 
     return (
       <Main color="gray">
@@ -155,23 +103,16 @@ export default function Game() {
                     {playersSlots}
                   </ol>
                 </div>
-                {playersActive.map((player) => {
-                  const isAdmin =
-                    player.data().admin == true && player.id == playerId;
-                  return isAdmin ? (
-                    <Button
-                      key={player.id}
-                      color={
-                        playersActive.length == room.count ? "green" : "red"
-                      }
-                      onClick={onNewGame}
-                      className="w-full"
-                      disabled={isAdmin ? false : true}
-                    >
-                      {t("playerId:start")}
-                    </Button>
-                  ) : null;
-                })}
+                {currentPlayer && currentPlayer.admin ? (
+                  <Button
+                    color={canStart ? "green" : "red"}
+                    onClick={onNewGame}
+                    className="w-full"
+                    disabled={!canStart || starting}
+                  >
+                    {starting ? t("playerId:loading") : t("playerId:start")}
+                  </Button>
+                ) : null}
               </div>
             </div>
           </div>

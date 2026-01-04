@@ -12,7 +12,7 @@ import {
   yellOne,
   passTurn,
   drawCard,
-  discardACard,
+  discardCard,
 } from "~/gameLogic/gameLogic";
 import useTranslation from "next-translate/useTranslation";
 import HeaderPlayer from "~/components/HeaderPlayer";
@@ -28,18 +28,21 @@ export default function GameInProgress({
   const { t } = useTranslation();
   const [wildCard, setWildCard] = useState(null);
   const { drawPileRef, pileRef, onCardAdd, onCardRemove } = useCardAnimations();
+  if (!room || !playersActive || playersActive.length === 0) {
+    return null;
+  }
   const currentMovePlayer = playersActive[room.currentMove];
 
   const onYellOne = (player) => {
-    yellOne(player, roomId, playersActive, room);
+    yellOne(roomId, player);
   };
 
   const onPassTurn = (player) => {
-    passTurn(player, roomId, room, playersActive);
+    passTurn(roomId, player, currentMovePlayer.id);
   };
 
   const onDrawCard = () => {
-    drawCard(room, playersActive, roomId);
+    drawCard(roomId, playerId);
   };
 
   const onDiscardACard = (card, color) => {
@@ -47,7 +50,7 @@ export default function GameInProgress({
       setWildCard(card);
       return;
     }
-    discardACard(roomId, playersActive, card, color, room);
+    discardCard(roomId, playerId, card, color);
     setWildCard(null);
   };
   return (
@@ -66,11 +69,11 @@ export default function GameInProgress({
                 }
               >
                 {currentMovePlayer.id == player.id ? <span>👉 </span> : null}
-                {player.data().name}
+                {player.name}
               </span>
             </HeaderPlayer>
             <PlayerCards
-              cards={sortCards(player.data().cards)}
+              cards={sortCards(player.cards)}
               isCurrentPlayer={isCurrentPlayer}
               onDiscardACard={onDiscardACard}
               isCardDisabled={(card) =>
@@ -80,7 +83,7 @@ export default function GameInProgress({
                   room.discardPile,
                   room.discardColor,
                   room.drawCount,
-                  player.data().cards
+                  player.cards
                 )
               }
               onCardAdd={onCardAdd}
@@ -122,7 +125,7 @@ export default function GameInProgress({
         yellOneMessage={
           room.yellOne != null ? (
             <h1 className="z-10 bg-red-700 text-white m-2 font-medium text-center text-xl md:text-2x p-4 rounded">
-              {t("playerId:yell-one")} {playersActive[room.yellOne].data().name}
+              {t("playerId:yell-one")} {playersActive[room.yellOne]?.name}
             </h1>
           ) : null
         }

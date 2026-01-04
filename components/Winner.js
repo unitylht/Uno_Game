@@ -4,6 +4,8 @@ import PlayerCards from "~/components/PlayerCards";
 import { isAllowedToThrow, isWild, sortCards } from "~/utils/game";
 import useCardAnimations from "~/hooks/useCardAnimations";
 import WinnerPlayersCards from "~/components/WinnerPlayersCards";
+import { discardCard } from "~/gameLogic/gameLogic";
+import { useState } from "react";
 
 export default function Winner({
   onNewGame,
@@ -13,16 +15,25 @@ export default function Winner({
   playersActive,
   playerId,
 }) {
+  const [wildCard, setWildCard] = useState(null);
   const { drawPileRef, pileRef, onCardAdd, onCardRemove } = useCardAnimations();
+  if (
+    !room ||
+    !playersActive ||
+    playersActive.length === 0 ||
+    room.currentMove == null
+  ) {
+    return null;
+  }
   const onDiscardACard = (card, color) => {
     if (isWild(card) && !color) {
       setWildCard(card);
       return;
     }
-    discardACard(roomId, playersActive, card, color, room);
+    discardCard(roomId, playerId, card, color);
     setWildCard(null);
   };
-  const currentMovePlayer = playersActive[room.currentMove];
+  const currentMovePlayer = playersActive[room.currentMove] || playersActive[0];
   return (
     <>
       <WinnerBoardLayout
@@ -40,11 +51,11 @@ export default function Winner({
                     : "opacity-50 pl-2"
                 }
               >
-                {player.data().name}
+                {player.name}
               </span>
             </Heading>
             <WinnerPlayersCards
-              cards={sortCards(player.data().cards)}
+              cards={sortCards(player.cards)}
               isCurrentPlayer={isCurrentPlayer}
               onDiscardACard={onDiscardACard}
               isCardDisabled={(card) =>
@@ -54,7 +65,7 @@ export default function Winner({
                   room.discardPile,
                   room.discardColor,
                   room.drawCount,
-                  player.data().cards
+                  player.cards
                 )
               }
               onCardAdd={onCardAdd}
@@ -65,7 +76,7 @@ export default function Winner({
       />
       {/* <div className="flex flex-col items-center justify-center h-screen">
         <h1 className="z-10 bg-red-700 text-white m-2 font-medium text-center text-xl md:text-2x p-4 rounded">
-          Ganó el jugador: {winner.data().name}
+          Ganó el jugador: {winner.name}
         </h1>
         tendria que aparecer las cartas de los oponentes 
       dadas vuelta y en cada jugador el total de puntos 

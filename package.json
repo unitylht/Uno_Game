@@ -7,7 +7,8 @@
     "dev": "next-translate && next dev",
     "build": "next-translate && next build",
     "start": "next start",
-    "test": "jest"
+    "test": "jest",
+    "server": "node server/index.js"
   },
   "keywords": [],
   "author": "",
@@ -22,7 +23,11 @@
     "react": "^16.13.1",
     "react-copy-to-clipboard": "^5.0.2",
     "react-dom": "^16.13.1",
-    "react-modal": "^3.11.2"
+    "react-modal": "^3.11.2",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "uuid": "^9.0.1",
+    "ws": "^8.17.0"
   },
   "devDependencies": {
     "@fullhuman/postcss-purgecss": "^2.2.0",

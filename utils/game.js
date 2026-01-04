@@ -10,7 +10,7 @@ export function range() {
   return deck;
 }
 
-export function takeACard(usedCards, playingCards) {
+export function takeACard(usedCards, playingCards = []) {
   let random_card = Math.floor(Math.random() * cardsCount);
 
   const deck = range();
@@ -20,7 +20,8 @@ export function takeACard(usedCards, playingCards) {
     usedCards[card] = true;
     return card;
   } else if (
-    Object.keys(usedCards).filter((card) => usedCards[card]).length == 108
+    Object.keys(usedCards).filter((card) => usedCards[card]).length >=
+    cardsCount
   ) {
     console.log("No hay mas cartas");
     // las cartas usadas se vuelven al mazo PPal
