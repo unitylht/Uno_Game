@@ -15,9 +15,14 @@ export default function NewGame() {
   const [name, setName] = useState("");
   const onSubmit = (event) => {
     event.preventDefault();
+    const playerCount = Number(value);
 
     db.collection("rooms")
-      .add({ count: value, deckDict: {}, date: Timestamp.fromDate(new Date()) })
+      .add({
+        count: playerCount,
+        deckDict: {},
+        date: Timestamp.fromDate(new Date()),
+      })
       .then(
         (roomRef) => {
           roomRef
@@ -65,9 +70,14 @@ export default function NewGame() {
                       value={value}
                       onChange={(e) => setValue(e.target.value)}
                     >
-                      <option value="2">2</option>
-                      <option value="3">3</option>
-                      <option value="4">4</option>
+                      {[...Array(9)].map((_, index) => {
+                        const optionValue = (index + 2).toString();
+                        return (
+                          <option value={optionValue} key={optionValue}>
+                            {optionValue}
+                          </option>
+                        );
+                      })}
                     </select>
                   </label>
                 </div>

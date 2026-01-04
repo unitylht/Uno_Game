@@ -1,4 +1,4 @@
-export const cards = [
+const standardDeck = [
   { color: "green", number: 0 },
   { color: "green", number: 1 },
   { color: "green", number: 2 },
@@ -108,3 +108,7 @@ export const cards = [
   { special: "wild-drawFour" },
   { special: "wild-drawFour" },
 ];
+
+// Use two full UNO decks (216 cards) to support large lobbies without
+// exhausting the draw pile too quickly.
+export const cards = [...standardDeck, ...standardDeck];
