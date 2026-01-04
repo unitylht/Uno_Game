@@ -25,6 +25,25 @@ app.use(express.json());
 const rooms = new Map();
 const roomSockets = new Map();
 
+app.get("/", (req, res) => {
+  res.json({
+    message: "Uno Game API server is running",
+    endpoints: {
+      createRoom: "POST /api/rooms { count, name }",
+      joinRoom: "POST /api/rooms/:roomId/players { name }",
+      roomState: "GET /api/rooms/:roomId",
+      start: "POST /api/rooms/:roomId/start { playerId }",
+      draw: "POST /api/rooms/:roomId/actions/draw { playerId }",
+      discard:
+        "POST /api/rooms/:roomId/actions/discard { playerId, card, color }",
+      pass: "POST /api/rooms/:roomId/actions/pass { playerIndex, playerId }",
+      yell: "POST /api/rooms/:roomId/actions/yell { playerIndex }",
+      websocket: "/ws?roomId=<id>&playerId=<optional>",
+    },
+    frontend: "Use http://localhost:3000 for the web client by default.",
+  });
+});
+
 function broadcastRoom(roomId) {
   const room = rooms.get(roomId);
   const clients = roomSockets.get(roomId) || new Set();

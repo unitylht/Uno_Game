@@ -43,6 +43,7 @@ npm run dev
 yarn dev
 ```
 Open http://localhost:3000 with your browser to see the result.
+The API server (`npm run server`) responds with JSON (e.g., `GET /` shows a short help message); the web UI lives at port 3000.
 
 ### Configuration
 - Create a `.env.local` (or `.env`) file from `.env.template`.
