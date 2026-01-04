@@ -1,5 +1,5 @@
 {
-  "no-more-place": "There are no more places to play... Create a new game..",
+  "no-more-place": "The room is full (maximum 10 players). Create a new game.",
   "game-isplaying": "Game has already started...",
   "join-game": "Join Game",
   "join": "Start"
