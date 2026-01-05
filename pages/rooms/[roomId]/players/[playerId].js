@@ -18,6 +18,10 @@ export default function Game() {
   const router = useRouter();
   const roomId = router.query.roomId;
   const playerId = router.query.playerId;
+  const translateOrDefault = (key, fallback) => {
+    const value = t(key);
+    return !value || value === key ? fallback : value;
+  };
   const { room, players: playersActive } = useRoomSubscription(
     roomId,
     playerId
@@ -36,7 +40,7 @@ export default function Game() {
 
   if (!room) {
     return (
-      <Main color={"gray"}>
+      <Main color={"gradient"}>
         <Layout />
         <Heading type="h1" color="white">
           {t("playerId:loading")}
@@ -46,7 +50,7 @@ export default function Game() {
   }
   if (room.playing) {
     return (
-      <Main color={"gray"}>
+      <Main color={"gradient"}>
         <Layout />
         <StartGame
           room={room}
@@ -62,13 +66,19 @@ export default function Game() {
     for (let i = 0; i < room.count; i++) {
       const player = playersActive[i];
       playersSlots.push(
-        <li className="py-2 text-gray-700" key={i}>
-          <div className="flex">
-            <span className="flex-auto">
+        <li className="py-2 text-gray-100" key={i}>
+          <div className="flex items-center gap-2">
+            <span className="flex-auto font-medium">
               {player ? player.name : t("playerId:waiting-player")}
               {player && player.id === playerId ? t("playerId:you") : null}
             </span>
-            {player ? <span>✅</span> : null}
+            {player ? (
+              <span className="text-emerald-300" aria-label="Ready">
+                ✅
+              </span>
+            ) : (
+              <span className="text-gray-500">• • •</span>
+            )}
           </div>
         </li>
       );
@@ -78,41 +88,73 @@ export default function Game() {
     const canStart = currentPlayer?.admin && playersActive.length === room.count;
 
     return (
-      <Main color="gray">
+      <Main color="gradient">
         <Layout />
-        <div className="flex-auto px-4 py-8 px-4 py-8 mx-auto w-full">
-          <div className="flex items-center justify-center">
-            <div className="w-full max-w-lg ">
-              <div className="bg-white p-4 rounded shadow">
-                <div className="my-4">
-                  <p className="text-gray-700 font-bold">
-                    {t("playerId:link")}
-                  </p>
-                  <input
-                    className="w-full text-gray-700 border-2 border-gray-300 h-12 mt-1 p-2 rounded g-gray-200 my-4"
-                    readOnly
-                    value={`${getBaseUrl()}/rooms/${roomId}`}
-                  ></input>
-                  <RoomLinkButton link={`${getBaseUrl()}/rooms/${roomId}`} />
+        <div className="flex-auto px-4 py-12 mx-auto w-full max-w-5xl">
+          <div className="grid gap-8 lg:grid-cols-2">
+            <div className="backdrop-blur-xl bg-white/10 border border-white/10 rounded-2xl shadow-2xl p-8 text-white">
+              <div className="my-4">
+                <p className="text-sm uppercase tracking-[0.2em] text-gray-300 mb-2">
+                  {t("playerId:link")}
+                </p>
+                <input
+                  className="w-full text-white bg-gray-900/60 border border-white/20 h-12 mt-1 p-3 rounded-xl my-4 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition"
+                  readOnly
+                  value={`${getBaseUrl()}/rooms/${roomId}`}
+                ></input>
+                <RoomLinkButton link={`${getBaseUrl()}/rooms/${roomId}`} />
+              </div>
+              <div className="my-6">
+                <p className="text-sm uppercase tracking-[0.2em] text-gray-300 mb-2">
+                  {t("playerId:players")}
+                </p>
+                <ol className="divide-y divide-white/10 list-decimal pl-5">
+                  {playersSlots}
+                </ol>
+              </div>
+              {currentPlayer && currentPlayer.admin ? (
+                <Button
+                  color={canStart ? "green" : "red"}
+                  onClick={onNewGame}
+                  className="w-full"
+                  disabled={!canStart || starting}
+                >
+                  {starting ? t("playerId:loading") : t("playerId:start")}
+                </Button>
+              ) : null}
+            </div>
+            <div className="backdrop-blur-xl bg-black/40 border border-white/5 rounded-2xl shadow-2xl p-8 text-white">
+              <h3 className="text-xl font-semibold mb-4">
+                {translateOrDefault("common:status", "Status")}
+              </h3>
+              <div className="space-y-3 text-sm text-gray-200">
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-emerald-300 animate-pulse" />
+                  <span>
+                    {translateOrDefault(
+                      "common:lobby-ready",
+                      "Lobby ready for players."
+                    )}
+                  </span>
                 </div>
-                <div className="my-4">
-                  <p className="text-gray-700 font-bold">
-                    {t("playerId:players")}
-                  </p>
-                  <ol className="divide-y divide-gray-400 list-decimal pl-5">
-                    {playersSlots}
-                  </ol>
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-amber-300 animate-pulse" />
+                  <span>
+                    {translateOrDefault(
+                      "common:start-when-full",
+                      "Admin can start when all seats are taken."
+                    )}
+                  </span>
                 </div>
-                {currentPlayer && currentPlayer.admin ? (
-                  <Button
-                    color={canStart ? "green" : "red"}
-                    onClick={onNewGame}
-                    className="w-full"
-                    disabled={!canStart || starting}
-                  >
-                    {starting ? t("playerId:loading") : t("playerId:start")}
-                  </Button>
-                ) : null}
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-sky-300 animate-pulse" />
+                  <span>
+                    {translateOrDefault(
+                      "common:share-link",
+                      "Share the room link to invite friends instantly."
+                    )}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
