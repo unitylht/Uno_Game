@@ -533,6 +533,7 @@ const CardBase = ({
   wildColor,
   onRemove,
   onAdd,
+  allowSmallSize = false,
 }) => {
   const ref = useRef();
   useEffect(() => {
@@ -551,8 +552,12 @@ const CardBase = ({
   let cardSpecial;
   const index = card - 1;
   const cardObject = cards[index];
-  const effectiveSizeSM = Math.max(sizeSM, MIN_CARD_WIDTH);
-  const effectiveSizeMD = Math.max(sizeMD ?? sizeSM, MIN_CARD_WIDTH);
+  const effectiveSizeSM = allowSmallSize
+    ? sizeSM
+    : Math.max(sizeSM, MIN_CARD_WIDTH);
+  const effectiveSizeMD = allowSmallSize
+    ? sizeMD ?? sizeSM
+    : Math.max(sizeMD ?? sizeSM, MIN_CARD_WIDTH);
   const cardStyle = {
     "--card-width": `${effectiveSizeSM}px`,
     "--card-md-width": `${effectiveSizeMD}px`,
@@ -843,7 +848,8 @@ const areCardPropsEqual = (prev, next) =>
   prev.opacity === next.opacity &&
   prev.wildColor === next.wildColor &&
   prev.sizeSM === next.sizeSM &&
-  prev.sizeMD === next.sizeMD;
+  prev.sizeMD === next.sizeMD &&
+  prev.allowSmallSize === next.allowSmallSize;
 
 const areBackPropsEqual = (prev, next) =>
   prev.size === next.size &&
