@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import classnames from "classnames";
 const MAIN_COLORS = {
   green: "bg-green-900",
@@ -6,6 +7,10 @@ const MAIN_COLORS = {
 const JUSTIFY = {
   start: "",
   center: "justify-center",
+};
+const PRIMARY_BACKGROUND = {
+  green: "#064e3b",
+  gray: "#111827",
 };
 
 function setViewportHeight() {
@@ -23,6 +28,13 @@ if (typeof window !== "undefined") {
 }
 
 export default function Main({ children, color = "gray", justify = "start" }) {
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const background = PRIMARY_BACKGROUND[color] || PRIMARY_BACKGROUND.gray;
+    document.documentElement.style.setProperty("--primary-bg-color", background);
+    document.body.style.backgroundColor = background;
+  }, [color]);
+
   const className = classnames([
     "flex flex-col height-screen",
     MAIN_COLORS[color],
