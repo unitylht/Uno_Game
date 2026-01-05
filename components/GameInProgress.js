@@ -266,13 +266,6 @@ export default function GameInProgress({
     </div>
   );
 
-  const goToHand = useCallback(() => {
-    const el = document.getElementById("hand-drawer");
-    if (el && el.scrollIntoView) {
-      el.scrollIntoView({ behavior: "smooth", block: "end" });
-    }
-  }, []);
-
   const toggleControls = useCallback(() => {
     setControlsCollapsed((prev) => !prev);
   }, []);
@@ -339,7 +332,6 @@ export default function GameInProgress({
         currentPlayerId={playerId}
         currentMovePlayer={derived.currentMovePlayer}
         drawPenalty={drawCount}
-        onGoToHand={goToHand}
         handDrawer={handDrawer}
         handDrawerHeight={handDrawerHeight}
         controlsCollapsed={controlsCollapsed}

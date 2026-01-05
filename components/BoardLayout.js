@@ -14,7 +14,6 @@ export default function BoardLayout({
   onNewGame,
   currentMovePlayer,
   drawPenalty,
-  onGoToHand,
   handDrawer,
   handDrawerHeight = 240,
   compactThreshold = 4,
@@ -104,12 +103,6 @@ export default function BoardLayout({
                 {collapseLabel}
               </button>
             ) : null}
-            <button
-              onClick={onGoToHand}
-              className="text-xs md:text-sm bg-yellow-400 hover:bg-yellow-300 text-black font-semibold px-3 py-1 rounded"
-            >
-              {t("common:go-to-hand") || "Go to my hand"}
-            </button>
           </div>
         </div>
       </div>
