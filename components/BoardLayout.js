@@ -1,4 +1,6 @@
 import useTranslation from "next-translate/useTranslation";
+import { createPortal } from "react-dom";
+import { useEffect, useMemo, useState } from "react";
 
 export default function BoardLayout({
   players,
@@ -14,25 +16,56 @@ export default function BoardLayout({
   drawPenalty,
   onGoToHand,
   handDrawer,
+  handDrawerHeight = 240,
   compactThreshold = 4,
 }) {
   const { t } = useTranslation();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const currentPlayer = players.find((player) => player.id == currentPlayerId);
   const indexCurrentPlayer = players.indexOf(currentPlayer);
-  const orderedPlayers =
-    currentPlayer && indexCurrentPlayer >= 0
-      ? [
-          ...players.slice(indexCurrentPlayer),
-          ...players.slice(0, indexCurrentPlayer),
-        ]
-      : players;
+  const orderedPlayers = useMemo(
+    () =>
+      currentPlayer && indexCurrentPlayer >= 0
+        ? [
+            ...players.slice(indexCurrentPlayer),
+            ...players.slice(0, indexCurrentPlayer),
+          ]
+        : players,
+    [currentPlayer, indexCurrentPlayer, players]
+  );
 
   const compactMode = players.length > compactThreshold;
   const turnLabel = t("common:turn") || "Turn";
   const drawLabel = t("common:draw") || "Draw";
+  const paddedContentHeight = `calc(${handDrawerHeight}px + env(safe-area-inset-bottom, 0px) + 2rem)`;
+  const drawerWithSafeArea = `calc(${handDrawerHeight}px + env(safe-area-inset-bottom, 0px))`;
+
+  const handDrawerPortal = useMemo(() => {
+    if (!isClient || !handDrawer) return null;
+    return createPortal(
+      <div
+        className="fixed bottom-0 left-0 right-0 z-50"
+        style={{
+          height: drawerWithSafeArea,
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        }}
+      >
+        <div className="h-full w-full pointer-events-auto">{handDrawer}</div>
+      </div>,
+      document.body
+    );
+  }, [drawerWithSafeArea, handDrawer, isClient]);
 
   return (
-    <div className="relative flex-1 w-full min-h-screen pb-64">
+    <div
+      className="relative flex-1 w-full min-h-screen"
+      style={{ paddingBottom: paddedContentHeight }}
+    >
       <div className="sticky top-0 z-20 w-full">
         <div className="bg-gray-900 bg-opacity-80 backdrop-blur text-white px-4 py-3 flex flex-wrap items-center justify-between gap-2 shadow-md">
           <div className="flex items-center gap-2 text-sm md:text-base">
@@ -125,7 +158,7 @@ export default function BoardLayout({
           )}
         </div>
       </div>
-      <div className="fixed bottom-0 left-0 right-0 z-40">{handDrawer}</div>
+      {handDrawerPortal}
     </div>
   );
 }
