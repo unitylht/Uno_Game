@@ -38,6 +38,7 @@ export default function GameInProgress({
   const [handDrawerHeight, setHandDrawerHeight] = useState(
     DEFAULT_HAND_DRAWER_HEIGHT
   );
+  const [controlsCollapsed, setControlsCollapsed] = useState(false);
 
   const playersActiveList = useMemo(() => playersActive || [], [playersActive]);
   const playerCount = playersActiveList.length;
@@ -272,6 +273,10 @@ export default function GameInProgress({
     }
   }, []);
 
+  const toggleControls = useCallback(() => {
+    setControlsCollapsed((prev) => !prev);
+  }, []);
+
   const renderPlayer = (player, isCurrentPlayer, isCompact) => (
     <>
       <HeaderPlayer
@@ -337,6 +342,8 @@ export default function GameInProgress({
         onGoToHand={goToHand}
         handDrawer={handDrawer}
         handDrawerHeight={handDrawerHeight}
+        controlsCollapsed={controlsCollapsed}
+        onToggleControls={toggleControls}
         renderPlayer={renderPlayer}
         drawPile={
           <DrawPile

@@ -18,6 +18,8 @@ export default function BoardLayout({
   handDrawer,
   handDrawerHeight = 240,
   compactThreshold = 4,
+  controlsCollapsed = false,
+  onToggleControls,
 }) {
   const { t } = useTranslation();
   const [isClient, setIsClient] = useState(false);
@@ -42,17 +44,24 @@ export default function BoardLayout({
   const compactMode = players.length > compactThreshold;
   const turnLabel = t("common:turn") || "Turn";
   const drawLabel = t("common:draw") || "Draw";
-  const paddedContentHeight = `calc(${handDrawerHeight}px + env(safe-area-inset-bottom, 0px) + 2rem)`;
+  const paddedContentHeight = controlsCollapsed
+    ? "3.5rem"
+    : `calc(${handDrawerHeight}px + env(safe-area-inset-bottom, 0px) + 2rem)`;
   const drawerWithSafeArea = `calc(${handDrawerHeight}px + env(safe-area-inset-bottom, 0px))`;
-  const actionPanelOffset = handDrawer
+  const actionPanelOffset = handDrawer && !controlsCollapsed
     ? `calc(${handDrawerHeight}px + env(safe-area-inset-bottom, 0px) + 0.5rem)`
     : "1rem";
+  const collapseLabel = controlsCollapsed
+    ? t("common:unfold-controls") || "Show deck & hand"
+    : t("common:fold-controls") || "Hide deck & hand";
 
   const handDrawerPortal = useMemo(() => {
     if (!isClient || !handDrawer) return null;
     return createPortal(
       <div
-        className="fixed bottom-0 left-0 right-0 z-50"
+        className={`fixed bottom-0 left-0 right-0 z-50 transition-transform duration-300 ease-in-out ${
+          controlsCollapsed ? "translate-y-full pointer-events-none" : "translate-y-0"
+        }`}
         style={{
           maxHeight: drawerWithSafeArea,
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
@@ -62,7 +71,7 @@ export default function BoardLayout({
       </div>,
       document.body
     );
-  }, [drawerWithSafeArea, handDrawer, isClient]);
+  }, [controlsCollapsed, drawerWithSafeArea, handDrawer, isClient]);
 
   return (
     <div
@@ -86,6 +95,14 @@ export default function BoardLayout({
               <div className="bg-red-700 text-white px-3 py-1 rounded shadow">
                 {yellOneMessage}
               </div>
+            ) : null}
+            {onToggleControls ? (
+              <button
+                onClick={onToggleControls}
+                className="text-xs md:text-sm bg-gray-200 hover:bg-white text-black font-semibold px-3 py-1 rounded shadow-inner"
+              >
+                {collapseLabel}
+              </button>
             ) : null}
             <button
               onClick={onGoToHand}
@@ -130,14 +147,18 @@ export default function BoardLayout({
         })}
       </div>
       <div
-        className="fixed inset-x-0 z-30 pointer-events-none"
+        className={`fixed inset-x-0 z-30 pointer-events-none transition-transform duration-300 ease-in-out ${
+          controlsCollapsed ? "translate-y-[120%]" : "translate-y-0"
+        }`}
         style={{
           bottom: actionPanelOffset,
           paddingInline: "0.75rem",
         }}
       >
         <div
-          className="w-full max-w-sm md:max-w-md mx-auto pointer-events-auto"
+          className={`w-full max-w-sm md:max-w-md mx-auto ${
+            controlsCollapsed ? "pointer-events-none" : "pointer-events-auto"
+          }`}
           style={{ maxWidth: "min(360px, calc(100% - 1.5rem))" }}
         >
           <div className="bg-gray-900 bg-opacity-90 text-white border border-gray-700 rounded-xl shadow-2xl p-3 flex flex-col gap-3">
