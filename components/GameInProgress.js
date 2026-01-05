@@ -1,5 +1,5 @@
 import useCardAnimations from "~/hooks/useCardAnimations";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { isAllowedToThrow, isWild, sortCards } from "~/utils/game";
 import PlayerCards from "~/components/PlayerCards";
 import WildCardOptions from "~/components/WildCardOptions";
@@ -17,6 +17,8 @@ import useTranslation from "next-translate/useTranslation";
 import HeaderPlayer from "~/components/HeaderPlayer";
 import { Card } from "~/components/Card";
 
+const HAND_DRAWER_HEIGHT = 240;
+
 export default function GameInProgress({
   room,
   roomId,
@@ -27,10 +29,31 @@ export default function GameInProgress({
 }) {
   const { t } = useTranslation();
   const [wildCard, setWildCard] = useState(null);
+  const [forceInlineHand, setForceInlineHand] = useState(false);
   const playerCount = playersActive?.length || 0;
   const animationEnabled = playerCount <= 6;
   const { drawPileRef, pileRef, onCardAdd, onCardRemove } =
     useCardAnimations(animationEnabled);
+
+  useEffect(() => {
+    const updateLayout = () => {
+      if (typeof window === "undefined") return;
+      const height = window.innerHeight || 0;
+      const width = window.innerWidth || 1;
+      const isPortrait = height >= width;
+      const compactHeight = height < 650;
+      setForceInlineHand(compactHeight || isPortrait);
+    };
+
+    updateLayout();
+    window.addEventListener("resize", updateLayout);
+    window.addEventListener("orientationchange", updateLayout);
+    return () => {
+      window.removeEventListener("resize", updateLayout);
+      window.removeEventListener("orientationchange", updateLayout);
+    };
+  }, []);
+
   if (!room || !playersActive || playerCount === 0) {
     return null;
   }
@@ -101,9 +124,10 @@ export default function GameInProgress({
   const handDrawer = (
     <div
       id="hand-drawer"
-      className="bg-gray-900 bg-opacity-95 border-t border-gray-800 shadow-2xl"
+      className="bg-gray-900 bg-opacity-95 border-t border-gray-800 shadow-2xl overflow-y-auto"
       style={{
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        height: "100%",
       }}
     >
       <div className="max-w-6xl mx-auto px-3 md:px-6 py-3 text-white">
@@ -161,6 +185,7 @@ export default function GameInProgress({
         drawPenalty={room.drawCount}
         onGoToHand={goToHand}
         handDrawer={handDrawer}
+        handDrawerHeight={HAND_DRAWER_HEIGHT}
         renderPlayer={(player, isCurrentPlayer, isCompact) => (
           <>
             <HeaderPlayer
@@ -189,7 +214,7 @@ export default function GameInProgress({
               onCardAdd={onCardAdd}
               onCardRemove={onCardRemove}
               winner={winner}
-              showInline={!isCurrentPlayer}
+              showInline={forceInlineHand || !isCurrentPlayer}
               compact={isCompact && !isCurrentPlayer}
             />
           </>
