@@ -28,7 +28,7 @@ export default function Game() {
   );
 
   const onNewGame = async (event) => {
-    event.preventDefault();
+    event?.preventDefault?.();
     if (!roomId || !playerId) return;
     try {
       setStarting(true);
