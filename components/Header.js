@@ -1,47 +1,28 @@
-// import Link from "next/link";
-import Link from "next-translate/Link";
+import Link from "next/link";
 import Heading from "~/components/Heading";
 import Container from "~/components/Container";
 import Modal from "~/components/Modal";
 import React, { useState } from "react";
 import Rules from "~/components/Rules";
 import useTranslation from "next-translate/useTranslation";
-import { allLanguages } from "~/i18n.json";
+import i18nConfig from "~/i18n";
 import Select from "~/components/Select";
 import { useRouter } from "next/router";
-import Router from "next-translate/Router";
 
 export default function Header() {
   const { t, lang } = useTranslation();
   const [showModal, setShowModal] = useState(false);
   const router = useRouter();
-  const languages = allLanguages.map((l) => ({
+  const languages = i18nConfig.locales.map((l) => ({
     id: l,
     name: t(`common:language-${l}`),
   }));
 
   const onLanguageChange = (l) => {
     const slash = "/";
-    const url =
-      "/" +
-      router.asPath
-        .split(slash)
-        .filter((p) => p && !allLanguages.includes(p))
-        .join(slash);
-
-    return Router.replaceI18n({
-      url: url || slash,
-      options: {
-        lang: l,
-      },
-    });
+    const asPath = router.asPath || slash;
+    return router.replace(asPath, asPath, { locale: l });
   };
-
-  /*
-    By default, next-translate adds the default language (es) to the URL
-    and we want to avoid that only in the home page
-  */
-  // const href = router.asPath === "/" ? "/" : `/${lang}`;
 
   return (
     <header className="w-full h-12 bg-white px-4 py-2">

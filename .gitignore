@@ -2,6 +2,3 @@
 .next
 .DS_Store
 node_modules
-
-# next-translate generated pages
-/pages

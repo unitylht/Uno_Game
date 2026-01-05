@@ -534,15 +534,16 @@ const CardBase = ({
 }) => {
   const ref = useRef();
   useEffect(() => {
-    if (onAdd) {
-      onAdd(ref.current);
+    const node = ref.current;
+    if (onAdd && node) {
+      onAdd(node);
     }
     return () => {
-      if (onRemove) {
-        onRemove(ref.current);
+      if (onRemove && node) {
+        onRemove(node);
       }
     };
-  }, []);
+  }, [onAdd, onRemove]);
   let cardColor;
   let cardNumber;
   let cardSpecial;
@@ -619,15 +620,16 @@ const CardBase = ({
 const BackCardBase = ({ sizeSM, sizeMD, size, onRemove, onAdd }) => {
   const ref = useRef();
   useEffect(() => {
-    if (onAdd) {
-      onAdd(ref.current);
+    const node = ref.current;
+    if (onAdd && node) {
+      onAdd(node);
     }
     return () => {
-      if (onRemove) {
-        onRemove(ref.current);
+      if (onRemove && node) {
+        onRemove(node);
       }
     };
-  }, []);
+  }, [onAdd, onRemove]);
 
   const backCard = (
     <g fillRule="evenodd">
