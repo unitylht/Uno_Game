@@ -358,12 +358,12 @@ app.post("/api/rooms/:roomId/actions/discard", (req, res, next) => {
     let pennalty = room.pennalty;
     const playingCards = getPlayingCards(room);
     if (yellOne == null && remainingCards.length === 1) {
-      pennalty = 4;
+      pennalty = 2;
     }
+    room.players[playerIndex].cards = remainingCards;
     if (pennalty > 0) {
       applyPenaltyCards(room, playerIndex, pennalty);
     }
-    room.players[playerIndex].cards = remainingCards;
     room.currentMove = nextPlayer;
     room.previousMove = playerIndex;
     room.discardPile = card;
