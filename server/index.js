@@ -331,6 +331,7 @@ app.post("/api/rooms/:roomId/actions/discard", (req, res, next) => {
       err.status = 400;
       throw err;
     }
+    const playerHadSingleCard = playerCards.length === 1;
     const valid = isAllowedToThrow(
       card,
       room.discardPile,
@@ -355,10 +356,12 @@ app.post("/api/rooms/:roomId/actions/discard", (req, res, next) => {
     }
     const remainingCards = playerCards.filter((c) => c !== card);
     let yellOne = verifyYellPlayer(room);
-    let pennalty = room.pennalty;
+    let pennalty = room.pennalty || 0;
     const playingCards = getPlayingCards(room);
-    if (yellOne == null && remainingCards.length === 1) {
-      pennalty = 2;
+    if (yellOne == null) {
+      if (remainingCards.length === 1 || playerHadSingleCard) {
+        pennalty += 2;
+      }
     }
     room.players[playerIndex].cards = remainingCards;
     if (pennalty > 0) {
