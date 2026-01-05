@@ -549,6 +549,10 @@ const CardBase = ({
   let cardSpecial;
   const index = card - 1;
   const cardObject = cards[index];
+  const cardStyle = {
+    "--card-width": `${sizeSM}px`,
+    "--card-md-width": `${sizeMD ?? sizeSM}px`,
+  };
   if (typeof cardObject.color == "undefined") {
     cardSpecial = cardObject.special;
     cardColor = wildColor || "none";
@@ -610,7 +614,8 @@ const CardBase = ({
       // style={{ height: `${size}em` }}
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 61 91"
-      className={`w-${sizeSM} md:w-${sizeMD}`}
+      style={cardStyle}
+      className="inline w-[var(--card-width)] md:w-[var(--card-md-width)]"
     >
       {singleCard}
     </svg>
@@ -798,13 +803,18 @@ const BackCardBase = ({ sizeSM, sizeMD, size, onRemove, onAdd }) => {
       </svg>
     </g>
   );
+  const backCardStyle = {
+    "--card-width": `${sizeSM}px`,
+    "--card-md-width": `${sizeMD ?? sizeSM}px`,
+  };
   return (
     <svg
       ref={ref}
       // style={{ height: `${size}em` }}
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 61 91"
-      className={`w-${sizeSM} md:w-${sizeMD} inline`}
+      style={backCardStyle}
+      className="inline w-[var(--card-width)] md:w-[var(--card-md-width)]"
     >
       {backCard}
     </svg>
