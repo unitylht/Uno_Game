@@ -90,73 +90,37 @@ export default function Game() {
     return (
       <Main color="gradient">
         <Layout />
-        <div className="flex-auto px-4 py-12 mx-auto w-full max-w-5xl">
-          <div className="grid gap-8 lg:grid-cols-2">
-            <div className="backdrop-blur-xl bg-white/10 border border-white/10 rounded-2xl shadow-2xl p-8 text-white">
-              <div className="my-4">
-                <p className="text-sm uppercase tracking-[0.2em] text-gray-300 mb-2">
-                  {t("playerId:link")}
-                </p>
-                <input
-                  className="w-full text-white bg-gray-900/60 border border-white/20 h-12 mt-1 p-3 rounded-xl my-4 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition"
-                  readOnly
-                  value={`${getBaseUrl()}/rooms/${roomId}`}
-                ></input>
-                <RoomLinkButton link={`${getBaseUrl()}/rooms/${roomId}`} />
-              </div>
-              <div className="my-6">
-                <p className="text-sm uppercase tracking-[0.2em] text-gray-300 mb-2">
-                  {t("playerId:players")}
-                </p>
-                <ol className="divide-y divide-white/10 list-decimal pl-5">
-                  {playersSlots}
-                </ol>
-              </div>
-              {currentPlayer && currentPlayer.admin ? (
-                <Button
-                  color={canStart ? "green" : "red"}
-                  onClick={onNewGame}
-                  className="w-full"
-                  disabled={!canStart || starting}
-                >
-                  {starting ? t("playerId:loading") : t("playerId:start")}
-                </Button>
-              ) : null}
+        <div className="flex-auto px-4 py-12 mx-auto w-full max-w-4xl">
+          <div className="backdrop-blur-xl bg-white/10 border border-white/10 rounded-2xl shadow-2xl p-8 text-white">
+            <div className="my-4">
+              <p className="text-sm uppercase tracking-[0.2em] text-gray-300 mb-2">
+                {t("playerId:link")}
+              </p>
+              <input
+                className="w-full text-white bg-gray-900/60 border border-white/20 h-12 mt-1 p-3 rounded-xl my-4 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition"
+                readOnly
+                value={`${getBaseUrl()}/rooms/${roomId}`}
+              ></input>
+              <RoomLinkButton link={`${getBaseUrl()}/rooms/${roomId}`} />
             </div>
-            <div className="backdrop-blur-xl bg-black/40 border border-white/5 rounded-2xl shadow-2xl p-8 text-white">
-              <h3 className="text-xl font-semibold mb-4">
-                {translateOrDefault("common:status", "Status")}
-              </h3>
-              <div className="space-y-3 text-sm text-gray-200">
-                <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-emerald-300 animate-pulse" />
-                  <span>
-                    {translateOrDefault(
-                      "common:lobby-ready",
-                      "Lobby ready for players."
-                    )}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-amber-300 animate-pulse" />
-                  <span>
-                    {translateOrDefault(
-                      "common:start-when-full",
-                      "Admin can start when all seats are taken."
-                    )}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-sky-300 animate-pulse" />
-                  <span>
-                    {translateOrDefault(
-                      "common:share-link",
-                      "Share the room link to invite friends instantly."
-                    )}
-                  </span>
-                </div>
-              </div>
+            <div className="my-6">
+              <p className="text-sm uppercase tracking-[0.2em] text-gray-300 mb-2">
+                {t("playerId:players")}
+              </p>
+              <ol className="divide-y divide-white/10 list-decimal pl-5">
+                {playersSlots}
+              </ol>
             </div>
+            {currentPlayer && currentPlayer.admin ? (
+              <Button
+                color={canStart ? "green" : "red"}
+                onClick={onNewGame}
+                className="w-full"
+                disabled={!canStart || starting}
+              >
+                {starting ? t("playerId:loading") : t("playerId:start")}
+              </Button>
+            ) : null}
           </div>
         </div>
         <Footer />

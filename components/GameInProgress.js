@@ -252,7 +252,7 @@ export default function GameInProgress({
         onCardAdd={onCardAdd}
         onCardRemove={onCardRemove}
         winner={winner}
-        showInline={forceInlineHand || !isCurrentPlayer}
+        showInline={forceInlineHand || isCurrentPlayer || !isCurrentPlayer}
         compact={isCompact && !isCurrentPlayer}
       />
     </>

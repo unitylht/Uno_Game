@@ -114,46 +114,6 @@ export default function NewGame() {
           </div>
 
           <div className="space-y-6">
-            <div className="bg-white/10 border border-white/10 rounded-2xl p-6 shadow-2xl text-white">
-              <p className="text-sm uppercase tracking-[0.2em] text-gray-300 mb-2">
-                {tf("common:live-status", "Live status")}
-              </p>
-              <h2 className="text-2xl font-semibold mb-3">
-                {tf("common:game-preview", "Table preview")}
-              </h2>
-              <p className="text-gray-200 text-sm leading-relaxed mb-4">
-                {tf(
-                  "common:table-preview-copy",
-                  "Modernized layout with responsive hand drawer, live turns, and quick wild-color selection."
-                )}
-              </p>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="bg-black/30 rounded-xl p-4 border border-white/5">
-                  <p className="text-gray-300 mb-1">
-                    {tf("common:feature-realtime", "Realtime sync")}
-                  </p>
-                  <p className="font-semibold">WebSockets</p>
-                </div>
-                <div className="bg-black/30 rounded-xl p-4 border border-white/5">
-                  <p className="text-gray-300 mb-1">
-                    {tf("common:feature-guards", "Play-safe guards")}
-                  </p>
-                  <p className="font-semibold">Turn validation</p>
-                </div>
-                <div className="bg-black/30 rounded-xl p-4 border border-white/5">
-                  <p className="text-gray-300 mb-1">
-                    {tf("common:feature-ux", "Refreshed UI")}
-                  </p>
-                  <p className="font-semibold">Glassmorphism</p>
-                </div>
-                <div className="bg-black/30 rounded-xl p-4 border border-white/5">
-                  <p className="text-gray-300 mb-1">
-                    {tf("common:feature-mobile", "Mobile-first")}
-                  </p>
-                  <p className="font-semibold">Adaptive hand</p>
-                </div>
-              </div>
-            </div>
             <div className="bg-black/40 border border-white/5 rounded-2xl p-6 text-white">
               <h3 className="text-lg font-semibold mb-2">
                 {tf("common:how-it-works", "How it works")}
