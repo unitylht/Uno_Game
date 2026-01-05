@@ -38,16 +38,17 @@ export default function GameInProgress({
   const sortedHands = useMemo(() => {
     const mapping = {};
     playersActive.forEach((player) => {
-      mapping[player.id] = sortCards(player.cards);
+      const playerKey = String(player.id);
+      mapping[playerKey] = sortCards(player.cards);
     });
     return mapping;
   }, [playersActive]);
   const currentPlayer =
-    playersActive.find((player) => player.id === playerId) || {
+    playersActive.find((player) => String(player.id) === String(playerId)) || {
       id: playerId,
       cards: [],
     };
-  const currentPlayerCards = sortedHands[playerId] || [];
+  const currentPlayerCards = sortedHands[String(playerId)] || [];
   const yellOneMessage =
     room.yellOne != null
       ? `${t("playerId:yell-one")} ${playersActive[room.yellOne]?.name}`
@@ -96,6 +97,9 @@ export default function GameInProgress({
     <div
       id="hand-drawer"
       className="bg-gray-900 bg-opacity-95 border-t border-gray-800 shadow-2xl"
+      style={{
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
+      }}
     >
       <div className="max-w-6xl mx-auto px-3 md:px-6 py-3 text-white">
         <div className="flex items-center justify-between text-sm md:text-base mb-2">
@@ -108,7 +112,7 @@ export default function GameInProgress({
         </div>
         <div
           className="overflow-x-auto touch-pan-x"
-          style={{ touchAction: "pan-x" }}
+          style={{ touchAction: "pan-x", maxHeight: "50vh" }}
         >
           <div className="flex items-center gap-3 md:gap-4 py-1">
             {currentPlayerCards.map((card, index) => {
@@ -173,7 +177,7 @@ export default function GameInProgress({
               </span>
             </HeaderPlayer>
             <PlayerCards
-              cards={sortedHands[player.id] || []}
+              cards={sortedHands[String(player.id)] || []}
               isCurrentPlayer={isCurrentPlayer}
               onDiscardACard={onDiscardACard}
               isCardDisabled={(card) => isCardDisabled(card, player)}

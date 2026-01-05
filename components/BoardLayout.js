@@ -95,7 +95,7 @@ export default function BoardLayout({
       </div>
       <div
         className="fixed right-3 bottom-28 md:bottom-32 z-30 w-full max-w-sm md:max-w-md"
-        style={{ maxWidth: "min(360px, calc(100% - 1.5rem))" }}
+        style={{ maxWidth: "min(360px, calc(100% - 1.5rem))", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
         <div className="bg-gray-900 bg-opacity-90 text-white border border-gray-700 rounded-xl shadow-2xl p-3 flex flex-col gap-3">
           {winner ? (
@@ -122,7 +122,7 @@ export default function BoardLayout({
           )}
         </div>
       </div>
-      <div className="fixed bottom-0 left-0 right-0 z-20">{handDrawer}</div>
+      <div className="fixed bottom-0 left-0 right-0 z-40">{handDrawer}</div>
     </div>
   );
 }
