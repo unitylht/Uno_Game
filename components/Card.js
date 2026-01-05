@@ -523,8 +523,10 @@ const specialShapes = {
   },
 };
 
+const MIN_CARD_WIDTH = 70;
+
 const CardBase = ({
-  sizeSM,
+  sizeSM = MIN_CARD_WIDTH,
   sizeMD,
   card,
   opacity = "opacity-100",
@@ -549,9 +551,11 @@ const CardBase = ({
   let cardSpecial;
   const index = card - 1;
   const cardObject = cards[index];
+  const effectiveSizeSM = Math.max(sizeSM, MIN_CARD_WIDTH);
+  const effectiveSizeMD = Math.max(sizeMD ?? sizeSM, MIN_CARD_WIDTH);
   const cardStyle = {
-    "--card-width": `${sizeSM}px`,
-    "--card-md-width": `${sizeMD ?? sizeSM}px`,
+    "--card-width": `${effectiveSizeSM}px`,
+    "--card-md-width": `${effectiveSizeMD}px`,
   };
   if (typeof cardObject.color == "undefined") {
     cardSpecial = cardObject.special;
@@ -622,7 +626,14 @@ const CardBase = ({
   );
 };
 
-const BackCardBase = ({ sizeSM, sizeMD, size, onRemove, onAdd }) => {
+const BackCardBase = ({
+  sizeSM = MIN_CARD_WIDTH,
+  sizeMD,
+  size,
+  allowSmallSize = false,
+  onRemove,
+  onAdd,
+}) => {
   const ref = useRef();
   useEffect(() => {
     const node = ref.current;
@@ -803,9 +814,15 @@ const BackCardBase = ({ sizeSM, sizeMD, size, onRemove, onAdd }) => {
       </svg>
     </g>
   );
+  const effectiveSizeSM = allowSmallSize
+    ? sizeSM
+    : Math.max(sizeSM, MIN_CARD_WIDTH);
+  const effectiveSizeMD = allowSmallSize
+    ? sizeMD ?? sizeSM
+    : Math.max(sizeMD ?? sizeSM, MIN_CARD_WIDTH);
   const backCardStyle = {
-    "--card-width": `${sizeSM}px`,
-    "--card-md-width": `${sizeMD ?? sizeSM}px`,
+    "--card-width": `${effectiveSizeSM}px`,
+    "--card-md-width": `${effectiveSizeMD}px`,
   };
   return (
     <svg
@@ -831,7 +848,8 @@ const areCardPropsEqual = (prev, next) =>
 const areBackPropsEqual = (prev, next) =>
   prev.size === next.size &&
   prev.sizeSM === next.sizeSM &&
-  prev.sizeMD === next.sizeMD;
+  prev.sizeMD === next.sizeMD &&
+  prev.allowSmallSize === next.allowSmallSize;
 
 const Card = memo(CardBase, areCardPropsEqual);
 const BackCard = memo(BackCardBase, areBackPropsEqual);
