@@ -68,8 +68,8 @@ function PlayerCards({
                 <Card
                   onRemove={onCardRemove}
                   onAdd={onCardAdd}
-                  sizeSM={26}
-                  sizeMD={34}
+                  sizeSM={12}
+                  sizeMD={16}
                   card={card}
                   opacity={disabled ? "opacity-50" : "opacity-100"}
                 />
