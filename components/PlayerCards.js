@@ -34,6 +34,7 @@ function PlayerCards({
               sizeMD={10}
               onRemove={onCardRemove}
               onAdd={onCardAdd}
+              allowSmallSize
             />
           ))}
         </div>
@@ -90,6 +91,7 @@ function PlayerCards({
                   onAdd={onCardAdd}
                   sizeSM={12}
                   sizeMD={16}
+                  allowSmallSize
                 />
               )}
             </div>
