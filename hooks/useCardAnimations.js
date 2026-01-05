@@ -1,91 +1,80 @@
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 
-const useCardAnimations = () => {
-  const isMountedRef = useRef();
+const useCardAnimations = (enabled = true) => {
+  const isMountedRef = useRef(false);
   const pileRef = useRef();
   const drawPileRef = useRef();
+  const ghostRef = useRef();
 
   useEffect(() => {
     isMountedRef.current = true;
+    const ghostNode = document.createElement("div");
+    ghostNode.style.position = "fixed";
+    ghostNode.style.top = "0";
+    ghostNode.style.left = "0";
+    ghostNode.style.pointerEvents = "none";
+    ghostNode.style.zIndex = "60";
+    ghostNode.style.willChange = "transform";
+    ghostRef.current = ghostNode;
+    document.body.appendChild(ghostNode);
+
     return () => {
       isMountedRef.current = false;
+      ghostNode.remove();
     };
   }, []);
 
-  const onCardRemove = (el) => {
-    if (isMountedRef.current) {
-      animateCardTransition(el, pileRef.current);
+  const animateCardTransition = (cardElement, toElement) => {
+    if (!enabled || !isMountedRef.current) return;
+    if (!cardElement || !toElement || !ghostRef.current) return;
+
+    const originRect = cardElement.getBoundingClientRect();
+    const targetRect = toElement.getBoundingClientRect();
+
+    if (targetRect.height === 0 || originRect.height === 0) {
+      return;
     }
+
+    const scale = targetRect.height / originRect.height;
+    const ghost = ghostRef.current;
+    ghost.innerHTML = "";
+    const cardClone = cardElement.cloneNode(true);
+    cardClone.style.transformOrigin = "top left";
+    ghost.appendChild(cardClone);
+
+    requestAnimationFrame(() => {
+      const animation = ghost.animate(
+        [
+          {
+            transform: `translate(${originRect.left}px, ${originRect.top}px)`,
+          },
+          {
+            transform: `translate(${targetRect.left}px, ${targetRect.top}px) scale(${scale})`,
+          },
+        ],
+        {
+          duration: 280,
+          easing: "ease-in-out",
+          fill: "forwards",
+        }
+      );
+      animation.onfinish = () => {
+        if (ghostRef.current) {
+          ghostRef.current.innerHTML = "";
+        }
+      };
+    });
+  };
+
+  const onCardRemove = (el) => {
+    animateCardTransition(el, pileRef.current);
   };
 
   const onCardAdd = (el) => {
-    if (isMountedRef.current) {
-      animateCardTransition(drawPileRef.current, el);
-    }
+    animateCardTransition(drawPileRef.current, el);
   };
 
   return { drawPileRef, pileRef, onCardAdd, onCardRemove };
-};
-
-const animateCardTransition = (cardElement, toElement) => {
-  if (!cardElement || !toElement) {
-    console.log(
-      "Cannot animate card: cardElement: ",
-      cardElement,
-      "toElement:",
-      toElement
-    );
-    return;
-  }
-  const coords = cardElement.getBoundingClientRect();
-  const pileCoords = toElement.getBoundingClientRect();
-
-  if (pileCoords.height == 0 || coords.height == 0) {
-    console.log(
-      "Cannot animate card: pile height:",
-      pileCoords.height,
-      "card height:",
-      coords.height
-    );
-    return;
-  }
-
-  const scale = pileCoords.height / coords.height;
-
-  const cardClone = cardElement.cloneNode(true);
-  const toClone = toElement.cloneNode(true);
-
-  toElement.style.display = "none";
-
-  toElement.parentNode.appendChild(toClone);
-  document.body.appendChild(cardClone);
-  cardClone.style.position = "absolute";
-  cardClone.style.top = 0;
-  cardClone.style.left = 0;
-
-  const duration = 300;
-  cardClone.animate(
-    [
-      {
-        transformOrigin: "top left",
-        transform: `translate(${coords.left}px, ${coords.top}px)`,
-      },
-      {
-        transformOrigin: "top left",
-        transform: `translate(${pileCoords.left}px, ${pileCoords.top}px) scale(${scale})`,
-      },
-    ],
-    {
-      duration,
-      easing: "ease-in-out",
-      fill: "both",
-    }
-  );
-  setTimeout(() => {
-    cardClone.remove();
-    toElement.style.display = "initial";
-    toClone.remove();
-  }, duration);
 };
 
 export default useCardAnimations;

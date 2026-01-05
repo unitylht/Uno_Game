@@ -10,6 +10,11 @@ export default function BoardLayout({
   yellOneMessage,
   winner,
   onNewGame,
+  currentMovePlayer,
+  drawPenalty,
+  onGoToHand,
+  handDrawer,
+  compactThreshold = 4,
 }) {
   const { t } = useTranslation();
   const currentPlayer = players.find((player) => player.id == currentPlayerId);
@@ -22,63 +27,102 @@ export default function BoardLayout({
         ]
       : players;
 
-  return (
-    <div
-      className="grid gap-4"
-      style={{
-        gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-        alignContent: "start",
-        width: "100%",
-      }}
-    >
-      <div className="col-span-full flex flex-col items-center justify-center">
-        {winner ? null : yellOneMessage}
-      </div>
-      {orderedPlayers.map((player) => {
-        const isCurrentPlayer = player.id === currentPlayerId;
-        return (
-          <div
-            key={player.id}
-            className={`flex flex-col items-center p-4 rounded-lg border ${
-              isCurrentPlayer
-                ? "border-yellow-400 shadow-lg bg-white bg-opacity-25"
-                : "border-gray-600 bg-white bg-opacity-0"
-            }`}
-          >
-            {renderPlayer(player, isCurrentPlayer)}
-          </div>
-        );
-      })}
-      <div
-        className="col-span-full lg:px-20 py-4 flex flex-col justify-center items-center"
-      >
-        {winner ? (
-          <div className="flex flex-no-wrap">
-            <h1 className="z-10 bg-red-700 text-white m-2 font-medium text-center text-xl md:text-2x p-4 rounded">
-              {t("playerId:winner-board.winner")} {winner.name}
-            </h1>
-            {discardPile}
-          </div>
-        ) : (
-          <div className="flex flex-no-wrap">
-            {drawPile}
-            {discardPile}
-          </div>
-        )}
+  const compactMode = players.length > compactThreshold;
+  const turnLabel = t("common:turn") || "Turn";
+  const drawLabel = t("common:draw") || "Draw";
 
-        <div className="m-4 md:m-4 w-full sm:w-1/2 flex justify-center flex-col">
-          {winner ? (
+  return (
+    <div className="relative flex-1 w-full min-h-screen pb-64">
+      <div className="sticky top-0 z-20 w-full">
+        <div className="bg-gray-900 bg-opacity-80 backdrop-blur text-white px-4 py-3 flex flex-wrap items-center justify-between gap-2 shadow-md">
+          <div className="flex items-center gap-2 text-sm md:text-base">
+            <span className="font-semibold">
+              {turnLabel}: {currentMovePlayer?.name}
+            </span>
+            {typeof drawPenalty === "number" && drawPenalty > 0 ? (
+              <span className="text-xs md:text-sm bg-red-700 px-2 py-1 rounded">
+                {drawLabel} +{drawPenalty}
+              </span>
+            ) : null}
+          </div>
+          <div className="flex items-center gap-2 text-sm md:text-base">
+            {yellOneMessage ? (
+              <div className="bg-red-700 text-white px-3 py-1 rounded shadow">
+                {yellOneMessage}
+              </div>
+            ) : null}
             <button
-              className="bg-green-700 hover:bg-green-500 text-white font-bold py-2 px-4 rounded mr-2"
-              onClick={() => onNewGame()}
+              onClick={onGoToHand}
+              className="text-xs md:text-sm bg-yellow-400 hover:bg-yellow-300 text-black font-semibold px-3 py-1 rounded"
             >
-              {t("playerId:winner-board.replay")}
+              {t("common:go-to-hand") || "Go to my hand"}
             </button>
+          </div>
+        </div>
+      </div>
+      <div
+        className="grid gap-4 px-2 md:px-4 pt-4"
+        style={{
+          gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+          alignContent: "start",
+          width: "100%",
+        }}
+      >
+        {orderedPlayers.map((player, index) => {
+          const isCurrentPlayer = player.id === currentPlayerId;
+          const isNeighbor = index <= 2;
+          const isCompact = compactMode && !isNeighbor;
+          const statusLabel =
+            currentMovePlayer?.id === player.id
+              ? t("common:current-turn") || "Current turn"
+              : t("common:waiting") || "Waiting";
+          return (
+            <div
+              key={player.id}
+              title={`${player.name} • ${player.cards.length} ${
+                t("common:cards") || "cards"
+              } • ${statusLabel}`}
+              className={`flex flex-col gap-2 ${isCompact ? "p-3" : "p-4"} rounded-lg border overflow-hidden bg-gray-900 bg-opacity-30 ${
+                isCurrentPlayer
+                  ? "border-yellow-400 shadow-lg"
+                  : "border-gray-700"
+              }`}
+            >
+              {renderPlayer(player, isCurrentPlayer, isCompact)}
+            </div>
+          );
+        })}
+      </div>
+      <div
+        className="fixed right-3 bottom-28 md:bottom-32 z-30 w-full max-w-sm md:max-w-md"
+        style={{ maxWidth: "min(360px, calc(100% - 1.5rem))" }}
+      >
+        <div className="bg-gray-900 bg-opacity-90 text-white border border-gray-700 rounded-xl shadow-2xl p-3 flex flex-col gap-3">
+          {winner ? (
+            <div className="flex flex-col gap-2 items-center">
+              <h1 className="text-lg font-semibold text-center">
+                {t("playerId:winner-board.winner")} {winner.name}
+              </h1>
+              {discardPile}
+              <button
+                className="bg-green-700 hover:bg-green-500 text-white font-bold py-2 px-4 rounded w-full"
+                onClick={() => onNewGame()}
+              >
+                {t("playerId:winner-board.replay")}
+              </button>
+            </div>
           ) : (
-            playerOptions
+            <>
+              <div className="flex items-center justify-center gap-4">
+                {drawPile}
+                {discardPile}
+              </div>
+              <div className="w-full flex justify-center">{playerOptions}</div>
+            </>
           )}
         </div>
       </div>
+      <div className="fixed bottom-0 left-0 right-0 z-20">{handDrawer}</div>
     </div>
   );
 }

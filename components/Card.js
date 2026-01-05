@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, memo } from "react";
 import { cards } from "~/utils/cards";
 const colors = {
   red: "#f55",
@@ -523,7 +523,7 @@ const specialShapes = {
   },
 };
 
-const Card = ({
+const CardBase = ({
   sizeSM,
   sizeMD,
   card,
@@ -616,7 +616,7 @@ const Card = ({
   );
 };
 
-const BackCard = ({ sizeSM, sizeMD, size, onRemove, onAdd }) => {
+const BackCardBase = ({ sizeSM, sizeMD, size, onRemove, onAdd }) => {
   const ref = useRef();
   useEffect(() => {
     if (onAdd) {
@@ -808,5 +808,20 @@ const BackCard = ({ sizeSM, sizeMD, size, onRemove, onAdd }) => {
     </svg>
   );
 };
+
+const areCardPropsEqual = (prev, next) =>
+  prev.card === next.card &&
+  prev.opacity === next.opacity &&
+  prev.wildColor === next.wildColor &&
+  prev.sizeSM === next.sizeSM &&
+  prev.sizeMD === next.sizeMD;
+
+const areBackPropsEqual = (prev, next) =>
+  prev.size === next.size &&
+  prev.sizeSM === next.sizeSM &&
+  prev.sizeMD === next.sizeMD;
+
+const Card = memo(CardBase, areCardPropsEqual);
+const BackCard = memo(BackCardBase, areBackPropsEqual);
 
 export { Card, BackCard };

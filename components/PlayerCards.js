@@ -1,6 +1,7 @@
+import React, { memo } from "react";
 import { Card, BackCard } from "~/components/Card";
 
-export default function PlayerCards({
+function PlayerCards({
   cards,
   isCurrentPlayer,
   isCardDisabled,
@@ -8,61 +9,86 @@ export default function PlayerCards({
   onCardAdd,
   onCardRemove,
   winner,
+  showInline = true,
+  compact = false,
 }) {
-  return (
-    <div
-      className={
-        isCurrentPlayer
-          ? `flex align-start w-full flex-auto overflow-x-scroll pl-4 lg:pl-6`
-          : "w-full pr-10 md:pr-16"
-      }
-    >
+  if (!showInline && isCurrentPlayer) {
+    return (
+      <div className="w-full text-center text-xs md:text-sm text-gray-200 py-3">
+        <span className="opacity-80">Use the hand drawer to play your cards.</span>
+      </div>
+    );
+  }
+
+  if (compact) {
+    return (
       <div
-        className={`flex flex-row flex-no-wrap justify-center flex-auto ${
-          isCurrentPlayer ? "" : "h-16 md:h-32 relative"
-        }`}
+        className="w-full overflow-x-auto touch-pan-x flex items-center gap-2 py-2 px-2"
+        style={{ touchAction: "pan-x" }}
       >
+        <div className="flex items-center gap-1">
+          {[...Array(Math.min(3, cards.length)).keys()].map((idx) => (
+            <BackCard
+              key={`compact-${idx}`}
+              sizeSM={8}
+              sizeMD={10}
+              onRemove={onCardRemove}
+              onAdd={onCardAdd}
+            />
+          ))}
+        </div>
+        <span className="text-xs text-gray-100 whitespace-nowrap">
+          {cards.length} {cards.length === 1 ? "card" : "cards"}
+        </span>
+      </div>
+    );
+  }
+
+  const containerClasses = isCurrentPlayer
+    ? "flex w-full flex-auto overflow-x-auto touch-pan-x pl-4 lg:pl-6"
+    : "w-full overflow-x-auto touch-pan-x px-2 md:px-4";
+  const stackClasses = isCurrentPlayer
+    ? "flex flex-row flex-nowrap justify-start gap-4 md:gap-6 py-2"
+    : "flex flex-row flex-nowrap justify-start items-center gap-3 py-2";
+
+  return (
+    <div className={containerClasses} style={{ touchAction: "pan-x" }}>
+      <div className={stackClasses}>
         {cards.map((card, index) => {
           const disabled = isCardDisabled(card);
 
           return isCurrentPlayer ? (
-            // for sm: margin: 0 -15px md:0 -20px
-            <div
-              key={card}
-              className="-mx-4 lg:-mx-6 flex flex-col justify-center"
-            >
-              <button onClick={() => onDiscardACard(card)} disabled={disabled}>
+            <div key={`${card}-${index}`} className="flex flex-col justify-center">
+              <button
+                onClick={() => onDiscardACard(card)}
+                disabled={disabled}
+                className="focus:outline-none"
+              >
                 <Card
                   onRemove={onCardRemove}
                   onAdd={onCardAdd}
-                  sizeSM={24}
-                  sizeMD={32}
+                  sizeSM={26}
+                  sizeMD={34}
                   card={card}
                   opacity={disabled ? "opacity-50" : "opacity-100"}
                 />
               </button>
             </div>
           ) : (
-            <div
-              key={card + `_Back`}
-              className="absolute"
-              style={{
-                left: `${(100 / (cards.length + 1)) * (index + 1)}%`,
-              }}
-            >
+            <div key={`${card}_back_${index}`} className="flex-shrink-0">
               {winner ? (
                 <Card
                   onRemove={onCardRemove}
                   onAdd={onCardAdd}
                   card={card}
-                  sizeSM={10}
+                  sizeSM={12}
                   sizeMD={16}
                 />
               ) : (
                 <BackCard
                   onRemove={onCardRemove}
                   onAdd={onCardAdd}
-                  sizeSM={10}
+                  sizeSM={12}
                   sizeMD={16}
                 />
               )}
@@ -73,3 +99,14 @@ export default function PlayerCards({
     </div>
   );
 }
+
+export default memo(PlayerCards, (prev, next) => {
+  return (
+    prev.isCurrentPlayer === next.isCurrentPlayer &&
+    prev.winner === next.winner &&
+    prev.showInline === next.showInline &&
+    prev.compact === next.compact &&
+    prev.cards.length === next.cards.length &&
+    prev.cards.every((card, idx) => card === next.cards[idx])
+  );
+});
