@@ -15,11 +15,11 @@ export default function DrawPile({
       <div
         style={{
           position: "relative",
-          paddingRight: "1em",
+          paddingRight: "1.4em",
         }}
       >
         <div>
-          <BackCard sizeSM={16} sizeMD={20} />
+          <BackCard sizeSM={22} sizeMD={30} />
         </div>
         <div
           style={{
@@ -28,7 +28,7 @@ export default function DrawPile({
             left: ".5em",
           }}
         >
-          <BackCard sizeSM={16} sizeMD={20} />
+          <BackCard sizeSM={22} sizeMD={30} />
         </div>
         <div
           style={{
@@ -38,7 +38,7 @@ export default function DrawPile({
           }}
           ref={drawPileRef}
         >
-          <BackCard sizeSM={16} sizeMD={20} />
+          <BackCard sizeSM={22} sizeMD={30} />
         </div>
       </div>
     </button>

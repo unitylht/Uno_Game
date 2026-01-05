@@ -17,7 +17,7 @@ import {
 } from "~/gameLogic/gameLogic";
 import { isAllowedToThrow, isWild, sortCards } from "~/utils/game";
 
-const HAND_DRAWER_HEIGHT = 240;
+const DEFAULT_HAND_DRAWER_HEIGHT = 240;
 
 export default function GameInProgress({
   room,
@@ -35,6 +35,9 @@ export default function GameInProgress({
   const [wildCard, setWildCard] = useState(null);
   const [actionError, setActionError] = useState(null);
   const [forceInlineHand, setForceInlineHand] = useState(false);
+  const [handDrawerHeight, setHandDrawerHeight] = useState(
+    DEFAULT_HAND_DRAWER_HEIGHT
+  );
 
   const playersActiveList = useMemo(() => playersActive || [], [playersActive]);
   const playerCount = playersActiveList.length;
@@ -65,6 +68,52 @@ export default function GameInProgress({
     const timer = setTimeout(() => setActionError(null), 3200);
     return () => clearTimeout(timer);
   }, [actionError]);
+
+  useEffect(() => {
+    let resizeObserver;
+    let rafId;
+
+    const updateHandDrawerHeight = () => {
+      const handDrawerEl = document.getElementById("hand-drawer");
+      if (!handDrawerEl) return;
+      const measuredHeight = handDrawerEl.offsetHeight;
+      if (measuredHeight) {
+        setHandDrawerHeight(measuredHeight);
+      }
+    };
+
+    const attachObserverAndMeasure = () => {
+      const handDrawerEl = document.getElementById("hand-drawer");
+      if (!handDrawerEl) return;
+
+      updateHandDrawerHeight();
+
+      if (!resizeObserver && typeof ResizeObserver !== "undefined") {
+        resizeObserver = new ResizeObserver(updateHandDrawerHeight);
+        resizeObserver.observe(handDrawerEl);
+      }
+    };
+
+    const ensureDrawerMounted = () => {
+      attachObserverAndMeasure();
+      if (!document.getElementById("hand-drawer")) {
+        rafId = requestAnimationFrame(ensureDrawerMounted);
+      }
+    };
+
+    ensureDrawerMounted();
+    window.addEventListener("resize", updateHandDrawerHeight);
+
+    return () => {
+      window.removeEventListener("resize", updateHandDrawerHeight);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+    };
+  }, []);
 
   const derived = useMemo(() => {
     const currentMovePlayer =
@@ -287,7 +336,7 @@ export default function GameInProgress({
         drawPenalty={drawCount}
         onGoToHand={goToHand}
         handDrawer={handDrawer}
-        handDrawerHeight={HAND_DRAWER_HEIGHT}
+        handDrawerHeight={handDrawerHeight}
         renderPlayer={renderPlayer}
         drawPile={
           <DrawPile
