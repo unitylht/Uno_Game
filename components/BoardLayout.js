@@ -33,6 +33,36 @@ export default function BoardLayout({
 
   return (
     <div className="relative flex-1 w-full min-h-screen pb-64">
+      <style jsx>{`
+        .control-panel {
+          position: fixed;
+          right: 0.75rem;
+          top: 6rem;
+          z-index: 30;
+          width: 100%;
+          max-width: min(360px, calc(100% - 1.5rem));
+          padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        @media (max-width: 420px) {
+          .control-panel {
+            right: 0;
+            left: 0;
+            top: auto;
+            bottom: 6.5rem;
+            max-width: none;
+            display: flex;
+            justify-content: center;
+            padding-left: 1rem;
+            padding-right: 1rem;
+          }
+
+          .control-panel-inner {
+            width: 100%;
+            max-width: 540px;
+          }
+        }
+      `}</style>
       <div className="sticky top-0 z-20 w-full">
         <div className="bg-gray-900 bg-opacity-80 backdrop-blur text-white px-4 py-3 flex flex-wrap items-center justify-between gap-2 shadow-md">
           <div className="flex items-center gap-2 text-sm md:text-base">
@@ -94,13 +124,12 @@ export default function BoardLayout({
         })}
       </div>
       <div
-        className="fixed right-3 top-24 sm:top-20 z-30 w-full max-w-sm md:max-w-md pointer-events-auto"
+        className="control-panel"
         style={{
-          maxWidth: "min(360px, calc(100% - 1.5rem))",
-          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          paddingTop: "env(safe-area-inset-top, 0px)",
         }}
       >
-        <div className="bg-gray-900 bg-opacity-90 text-white border border-gray-700 rounded-xl shadow-2xl p-3 flex flex-col gap-3">
+        <div className="control-panel-inner bg-gray-900 bg-opacity-90 text-white border border-gray-700 rounded-xl shadow-2xl p-3 flex flex-col gap-3">
           {winner ? (
             <div className="flex flex-col gap-2 items-center">
               <h1 className="text-lg font-semibold text-center">
