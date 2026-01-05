@@ -130,7 +130,7 @@ export default function BoardLayout({
         })}
       </div>
       <div
-        className="fixed inset-x-0 z-30 pointer-events-none"
+        className="fixed inset-x-0 z-[60] pointer-events-none"
         style={{
           bottom: actionPanelOffset,
           paddingInline: "0.75rem",
