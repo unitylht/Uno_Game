@@ -44,6 +44,9 @@ export default function BoardLayout({
   const drawLabel = t("common:draw") || "Draw";
   const paddedContentHeight = `calc(${handDrawerHeight}px + env(safe-area-inset-bottom, 0px) + 2rem)`;
   const drawerWithSafeArea = `calc(${handDrawerHeight}px + env(safe-area-inset-bottom, 0px))`;
+  const actionPanelOffset = handDrawer
+    ? `calc(${handDrawerHeight}px + env(safe-area-inset-bottom, 0px) + 1rem)`
+    : "1rem";
 
   const handDrawerPortal = useMemo(() => {
     if (!isClient || !handDrawer) return null;
@@ -127,35 +130,40 @@ export default function BoardLayout({
         })}
       </div>
       <div
-        className="fixed right-3 top-24 sm:top-20 z-30 w-full max-w-sm md:max-w-md pointer-events-auto"
+        className="fixed inset-x-0 z-30 pointer-events-none"
         style={{
-          maxWidth: "min(360px, calc(100% - 1.5rem))",
-          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          bottom: actionPanelOffset,
+          paddingInline: "0.75rem",
         }}
       >
-        <div className="bg-gray-900 bg-opacity-90 text-white border border-gray-700 rounded-xl shadow-2xl p-3 flex flex-col gap-3">
-          {winner ? (
-            <div className="flex flex-col gap-2 items-center">
-              <h1 className="text-lg font-semibold text-center">
-                {t("playerId:winner-board.winner")} {winner.name}
-              </h1>
-              {discardPile}
-              <button
-                className="bg-green-700 hover:bg-green-500 text-white font-bold py-2 px-4 rounded w-full"
-                onClick={() => onNewGame()}
-              >
-                {t("playerId:winner-board.replay")}
-              </button>
-            </div>
-          ) : (
-            <>
-              <div className="flex items-center justify-center gap-4">
-                {drawPile}
+        <div
+          className="w-full max-w-sm md:max-w-md mx-auto pointer-events-auto"
+          style={{ maxWidth: "min(360px, calc(100% - 1.5rem))" }}
+        >
+          <div className="bg-gray-900 bg-opacity-90 text-white border border-gray-700 rounded-xl shadow-2xl p-3 flex flex-col gap-3">
+            {winner ? (
+              <div className="flex flex-col gap-2 items-center">
+                <h1 className="text-lg font-semibold text-center">
+                  {t("playerId:winner-board.winner")} {winner.name}
+                </h1>
                 {discardPile}
+                <button
+                  className="bg-green-700 hover:bg-green-500 text-white font-bold py-2 px-4 rounded w-full"
+                  onClick={() => onNewGame()}
+                >
+                  {t("playerId:winner-board.replay")}
+                </button>
               </div>
-              <div className="w-full flex justify-center">{playerOptions}</div>
-            </>
-          )}
+            ) : (
+              <>
+                <div className="flex items-center justify-center gap-4">
+                  {drawPile}
+                  {discardPile}
+                </div>
+                <div className="w-full flex justify-center">{playerOptions}</div>
+              </>
+            )}
+          </div>
         </div>
       </div>
       {handDrawerPortal}
