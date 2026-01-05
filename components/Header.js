@@ -37,10 +37,11 @@ export default function Header() {
           </Heading>
 
           <div className="flex items-center justify-end">
-            <Link href="/">
-              <a className="text-gray-700 text-center text-sm sm:text-base px-2 md:px-4 m-0 md:m-2 ">
-                {t("common:new-game")}
-              </a>
+            <Link
+              href="/"
+              className="text-gray-700 text-center text-sm sm:text-base px-2 md:px-4 m-0 md:m-2 "
+            >
+              {t("common:new-game")}
             </Link>
             <button
               id="rules"
