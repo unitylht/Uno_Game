@@ -54,11 +54,11 @@ export default function BoardLayout({
       <div
         className="fixed bottom-0 left-0 right-0 z-50"
         style={{
-          height: drawerWithSafeArea,
+          maxHeight: drawerWithSafeArea,
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
         }}
       >
-        <div className="h-full w-full pointer-events-auto">{handDrawer}</div>
+        <div className="w-full pointer-events-auto">{handDrawer}</div>
       </div>,
       document.body
     );

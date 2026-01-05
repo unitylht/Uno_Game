@@ -170,8 +170,7 @@ export default function GameInProgress({
       id="hand-drawer"
       className="bg-gradient-to-b from-gray-900 via-slate-900 to-black bg-opacity-95 border-t border-gray-800 shadow-2xl overflow-y-auto"
       style={{
-        paddingBottom: "env(safe-area-inset-bottom, 0px)",
-        height: "100%",
+        maxHeight: "100%",
       }}
     >
       <div className="max-w-6xl mx-auto px-3 md:px-6 py-3 text-white">
