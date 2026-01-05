@@ -1,25 +1,22 @@
 import Layout from "~/components/Layout.js";
 import React, { useState } from "react";
-// import Router from "next/router";
+import { useRouter } from "next/router";
 import Button from "~/components/Button";
 import Main from "~/components/Main";
 import Footer from "~/components/Footer";
 import useTranslation from "next-translate/useTranslation";
-import Router from "next-translate/Router";
 import { createRoom } from "~/utils/apiClient";
 
 export default function NewGame() {
   const { t } = useTranslation();
+  const router = useRouter();
   const [value, setValue] = useState("2");
   const [name, setName] = useState("");
   const onSubmit = (event) => {
     event.preventDefault();
     const playerCount = Number(value);
     createRoom(playerCount, name).then(({ roomId, playerId }) => {
-      Router.pushI18n(
-        "/rooms/[roomId]/players/[playerId]",
-        `/rooms/${roomId}/players/${playerId}`
-      );
+      router.push(`/rooms/${roomId}/players/${playerId}`);
     });
   };
 

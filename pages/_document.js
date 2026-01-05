@@ -1,6 +1,6 @@
 import Document, { Html, Head, Main, NextScript } from "next/document";
 import React, { Fragment } from "react";
-import documentLang from "next-translate/documentLang";
+import i18nConfig from "~/i18n";
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
@@ -9,8 +9,9 @@ class MyDocument extends Document {
   }
 
   render() {
+    const htmlLang = this.props.locale || i18nConfig.defaultLocale || "en";
     return (
-      <Html lang={documentLang(this.props)}>
+      <Html lang={htmlLang}>
         <Head>
           {/* Global Site Tag (gtag.js) - Google Analytics */}
           {process.env.GA_TRACKING_ID && (

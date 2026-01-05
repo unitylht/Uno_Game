@@ -1,6 +1,11 @@
 require("dotenv").config();
 
-module.exports = {
+const nextTranslate = require("next-translate-plugin");
+const i18nConfig = require("./i18n");
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
   env: {
     /* FIREBASE */
     API_KEY: process.env.API_KEY,
@@ -16,4 +21,10 @@ module.exports = {
     /* Sentry */
     SENTRY_DSN: process.env.SENTRY_DSN,
   },
+  i18n: {
+    locales: i18nConfig.locales,
+    defaultLocale: i18nConfig.defaultLocale,
+  },
 };
+
+module.exports = nextTranslate(nextConfig);

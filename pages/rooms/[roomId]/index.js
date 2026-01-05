@@ -5,7 +5,6 @@ import Button from "~/components/Button";
 import Main from "~/components/Main";
 import Footer from "~/components/Footer";
 import useTranslation from "next-translate/useTranslation";
-import Router from "next-translate/Router";
 import { fetchRoom, joinRoom } from "~/utils/apiClient";
 
 export default function Room() {
@@ -16,7 +15,7 @@ export default function Room() {
   const [playerName, setPlayerName] = useState("");
   const [roomPlaying, setRoomPlaying] = useState(false);
   const [formAllowedToSubmit, setFormAllowedToSubmit] = useState(true);
-  const onCreateRoom = (e) => {
+  const onCreateRoom = (event) => {
     event.preventDefault();
     if (formAllowedToSubmit) {
       setFormAllowedToSubmit(false);
@@ -32,10 +31,7 @@ export default function Room() {
             return;
           }
           joinRoom(roomId, playerName).then((response) => {
-            Router.pushI18n(
-              "/rooms/[roomId]/players/[playerId]",
-              `/rooms/${roomId}/players/${response.playerId}`
-            );
+            router.push(`/rooms/${roomId}/players/${response.playerId}`);
             setFormAllowedToSubmit(true);
           });
         },
@@ -82,12 +78,11 @@ export default function Room() {
                     <label className="block text-gray-700 text-base font-bold mb-2">
                       <p className="mb-4">{t("common:nickname")}</p>
                       <input
-                        className="w-full text-gray-700 border-2 border-gray-300 h-12 mt-1 p-2 rounded g-gray-200 my-4"
+                        className="w-full appearance-none border-2 border-gray-300 rounded text-gray-700 h-12 mt-1 mb-3 px-3 p-2 leading-tight focus:outline-none focus:shadow-outline bg-gray-200"
                         value={playerName}
                         onChange={(e) => setPlayerName(e.target.value)}
                         placeholder={t("common:nickname-holder")}
                         type="text"
-                        className="appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
                         required
                       ></input>
                     </label>

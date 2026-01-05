@@ -29,6 +29,14 @@ export default function GameInProgress({
 }) {
   const { t } = useTranslation();
   const [wildCard, setWildCard] = useState(null);
+  const playersActiveList = useMemo(
+    () => playersActive || [],
+    [playersActive]
+  );
+  const playerCount = playersActiveList.length;
+  const animationEnabled = playerCount <= 6;
+  const { drawPileRef, pileRef, onCardAdd, onCardRemove } =
+    useCardAnimations(animationEnabled);
   const [forceInlineHand, setForceInlineHand] = useState(false);
   const playerCount = playersActive?.length || 0;
   const animationEnabled = playerCount <= 6;
@@ -60,14 +68,27 @@ export default function GameInProgress({
   const currentMovePlayer = playersActive[room.currentMove];
   const sortedHands = useMemo(() => {
     const mapping = {};
-    playersActive.forEach((player) => {
+    playersActiveList.forEach((player) => {
       const playerKey = String(player.id);
       mapping[playerKey] = sortCards(player.cards);
     });
     return mapping;
-  }, [playersActive]);
+  }, [playersActiveList]);
+  const currentMovePlayer =
+    room &&
+    typeof room.currentMove === "number" &&
+    playersActiveList[room.currentMove]
+      ? playersActiveList[room.currentMove]
+      : null;
+  const hasActiveGame =
+    Boolean(room) && playerCount > 0 && Boolean(currentMovePlayer);
+  const discardPile = room?.discardPile;
+  const discardColor = room?.discardColor ?? null;
+  const drawCount = room?.drawCount ?? 0;
   const currentPlayer =
-    playersActive.find((player) => String(player.id) === String(playerId)) || {
+    playersActiveList.find(
+      (player) => String(player.id) === String(playerId)
+    ) || {
       id: playerId,
       cards: [],
     };
@@ -78,8 +99,10 @@ export default function GameInProgress({
   const fallbackYourHandLabel =
     yourHandLabel === "common:your-hand" ? "Your hand" : yourHandLabel;
   const yellOneMessage =
-    room.yellOne != null
-      ? `${t("playerId:yell-one")} ${playersActive[room.yellOne]?.name}`
+    room?.yellOne != null && playersActiveList[room.yellOne]
+      ? `${t("playerId:yell-one")} ${
+          playersActiveList[room.yellOne]?.name || ""
+        }`
       : null;
 
   const onYellOne = (player) => {
@@ -87,6 +110,7 @@ export default function GameInProgress({
   };
 
   const onPassTurn = (player) => {
+    if (!currentMovePlayer) return;
     passTurn(roomId, player, currentMovePlayer.id);
   };
 
@@ -105,20 +129,16 @@ export default function GameInProgress({
 
   const isCardDisabled = useCallback(
     (card, player) =>
+      !currentMovePlayer ||
       currentMovePlayer.id != player.id ||
       !isAllowedToThrow(
         card,
-        room.discardPile,
-        room.discardColor,
-        room.drawCount,
+        discardPile,
+        discardColor,
+        drawCount,
         player.cards
       ),
-    [
-      currentMovePlayer.id,
-      room.discardPile,
-      room.discardColor,
-      room.drawCount,
-    ]
+    [currentMovePlayer, discardPile, discardColor, drawCount]
   );
 
   const handDrawer = (
@@ -176,13 +196,18 @@ export default function GameInProgress({
       el.scrollIntoView({ behavior: "smooth", block: "end" });
     }
   }, []);
+
+  if (!hasActiveGame || !currentMovePlayer) {
+    return null;
+  }
+
   return (
     <div className="flex flex-1">
       <BoardLayout
-        players={playersActive}
+        players={playersActiveList}
         currentPlayerId={playerId}
         currentMovePlayer={currentMovePlayer}
-        drawPenalty={room.drawCount}
+        drawPenalty={drawCount}
         onGoToHand={goToHand}
         handDrawer={handDrawer}
         handDrawerHeight={HAND_DRAWER_HEIGHT}
@@ -222,15 +247,15 @@ export default function GameInProgress({
         drawPile={
           <DrawPile
             onDrawCard={onDrawCard}
-            canDrawFromPile={!room.drawPile}
+            canDrawFromPile={!room?.drawPile}
             isCurrentPlayerTurn={currentMovePlayer.id == playerId}
             drawPileRef={drawPileRef}
           />
         }
         discardPile={
           <DiscardPile
-            discardPile={room.discardPile}
-            discardColor={room.discardColor}
+            discardPile={discardPile}
+            discardColor={discardColor}
             pileRef={pileRef}
           />
         }

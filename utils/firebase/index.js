@@ -1,5 +1,9 @@
-import firebase from "firebase/app";
-import "firebase/firestore";
+import { getApps, getApp, initializeApp } from "firebase/app";
+import {
+  Timestamp,
+  connectFirestoreEmulator,
+  getFirestore,
+} from "firebase/firestore";
 
 const config = {
   apiKey: process.env.API_KEY,
@@ -12,16 +16,8 @@ const config = {
   measurementId: process.env.MEASUREMENT_ID,
 };
 
-let firebaseApp;
-
-if (firebase.apps.length) {
-  firebaseApp = firebase.apps[0];
-} else {
-  firebaseApp = firebase.initializeApp(config);
-}
-
-// firebase.initializeApp(config);
-const db = firebaseApp.firestore();
+const app = getApps().length ? getApp() : initializeApp(config);
+const db = getFirestore(app);
 const emulatorHost =
   process.env.NEXT_PUBLIC_FIRESTORE_EMULATOR_HOST ||
   process.env.FIRESTORE_EMULATOR_HOST;
@@ -30,7 +26,7 @@ if (emulatorHost && typeof window !== "undefined") {
   const [host, portString] = emulatorHost.split(":");
   const port = parseInt(portString, 10) || 8080;
   try {
-    db.useEmulator(host, port);
+    connectFirestoreEmulator(db, host, port);
     // eslint-disable-next-line no-console
     console.info(
       `Using Firestore emulator at ${host}:${port} (set via FIRESTORE_EMULATOR_HOST).`
@@ -41,6 +37,5 @@ if (emulatorHost && typeof window !== "undefined") {
   }
 }
 
-const { Timestamp } = firebase.firestore;
 export default db;
 export { Timestamp };
