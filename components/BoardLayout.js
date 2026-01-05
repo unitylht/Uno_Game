@@ -45,7 +45,7 @@ export default function BoardLayout({
   const paddedContentHeight = `calc(${handDrawerHeight}px + env(safe-area-inset-bottom, 0px) + 2rem)`;
   const drawerWithSafeArea = `calc(${handDrawerHeight}px + env(safe-area-inset-bottom, 0px))`;
   const actionPanelOffset = handDrawer
-    ? `calc(${handDrawerHeight}px + env(safe-area-inset-bottom, 0px) + 1rem)`
+    ? `calc(${handDrawerHeight}px + env(safe-area-inset-bottom, 0px) + 0.5rem)`
     : "1rem";
 
   const handDrawerPortal = useMemo(() => {
