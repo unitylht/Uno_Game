@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "next-translate && next dev",
-    "build": "next-translate && next build",
-    "start": "next start",
-    "test": "jest",
+    "dev": "cross-env NODE_OPTIONS=--openssl-legacy-provider next-translate && cross-env NODE_OPTIONS=--openssl-legacy-provider next dev",
+    "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider next-translate && cross-env NODE_OPTIONS=--openssl-legacy-provider next build",
+    "start": "cross-env NODE_OPTIONS=--openssl-legacy-provider next start",
+    "test": "cross-env NODE_OPTIONS=--openssl-legacy-provider jest",
     "server": "node server/index.js"
   },
   "keywords": [],
@@ -19,7 +19,9 @@
   "dependencies": {
     "@sentry/browser": "^5.16.1",
     "classnames": "^2.2.6",
+    "cors": "^2.8.5",
     "dotenv": "^8.2.0",
+    "express": "^4.19.2",
     "firebase": "^7.14.2",
     "next": "^9.3.6",
     "next-translate": "^0.17.1",
@@ -27,14 +29,13 @@
     "react-copy-to-clipboard": "^5.0.2",
     "react-dom": "^16.13.1",
     "react-modal": "^3.11.2",
-    "cors": "^2.8.5",
-    "express": "^4.19.2",
     "uuid": "^9.0.1",
     "ws": "^8.17.0"
   },
   "devDependencies": {
     "@fullhuman/postcss-purgecss": "^2.2.0",
     "autoprefixer": "^9.7.6",
+    "cross-env": "^7.0.3",
     "jest": "^26.0.1",
     "postcss-import": "^12.0.1",
     "tailwindcss": "^1.4.4"

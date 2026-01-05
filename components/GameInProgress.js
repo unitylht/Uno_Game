@@ -49,6 +49,11 @@ export default function GameInProgress({
       cards: [],
     };
   const currentPlayerCards = sortedHands[String(playerId)] || [];
+  const cardsLabel = t("common:cards");
+  const yourHandLabel = t("common:your-hand");
+  const fallbackCardsLabel = cardsLabel === "common:cards" ? "cards" : cardsLabel;
+  const fallbackYourHandLabel =
+    yourHandLabel === "common:your-hand" ? "Your hand" : yourHandLabel;
   const yellOneMessage =
     room.yellOne != null
       ? `${t("playerId:yell-one")} ${playersActive[room.yellOne]?.name}`
@@ -104,10 +109,10 @@ export default function GameInProgress({
       <div className="max-w-6xl mx-auto px-3 md:px-6 py-3 text-white">
         <div className="flex items-center justify-between text-sm md:text-base mb-2">
           <span className="font-semibold">
-            {t("common:your-hand") || "Your hand"}
+            {fallbackYourHandLabel}
           </span>
           <span className="text-xs opacity-80">
-            {currentPlayerCards.length} {t("common:cards") || "cards"}
+            {currentPlayerCards.length} {fallbackCardsLabel}
           </span>
         </div>
         <div
