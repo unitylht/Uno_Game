@@ -84,6 +84,16 @@ function ensureRoom(roomId) {
   return room;
 }
 
+function ensureAdmin(room, adminId) {
+  const admin = room.players.find((p) => p.id === adminId && p.admin);
+  if (!admin) {
+    const err = new Error("Only the admin can perform this action");
+    err.status = 403;
+    throw err;
+  }
+  return admin;
+}
+
 function assertPlayerCount(room) {
   if (room.players.length >= MAX_PLAYERS) {
     const err = new Error("Room is full");
@@ -102,6 +112,72 @@ function generateRoomCode() {
 
 function resetDeck(room) {
   room.usedCards = {};
+}
+
+function removePlayerFromRoom(room, roomId, playerId, { reassignAdmin = true } = {}) {
+  const playerIndex = room.players.findIndex((p) => p.id === playerId);
+  if (playerIndex === -1) {
+    const err = new Error("Player not found");
+    err.status = 404;
+    throw err;
+  }
+
+  const [removedPlayer] = room.players.splice(playerIndex, 1);
+
+  removedPlayer.cards.forEach((card) => {
+    if (room.usedCards[card]) {
+      room.usedCards[card] = false;
+    }
+  });
+
+  if (room.playing) {
+    if (room.players.length === 0) {
+      room.playing = false;
+      room.discardPile = null;
+      room.discardColor = null;
+      room.currentMove = 0;
+      room.previousMove = null;
+      room.isReverse = false;
+      room.drawPile = false;
+      room.drawCount = 0;
+      room.yellOne = null;
+      room.pennalty = null;
+    } else {
+      if (room.currentMove === playerIndex) {
+        room.currentMove = playerIndex % room.players.length;
+      } else if (room.currentMove > playerIndex) {
+        room.currentMove -= 1;
+      }
+
+      if (room.previousMove === playerIndex) {
+        room.previousMove = null;
+      } else if (room.previousMove > playerIndex) {
+        room.previousMove -= 1;
+      }
+
+      if (room.players.length < MIN_PLAYERS) {
+        room.playing = false;
+        room.discardPile = null;
+        room.discardColor = null;
+        room.currentMove = 0;
+        room.isReverse = false;
+        room.drawPile = false;
+        room.drawCount = 0;
+        room.yellOne = null;
+        room.pennalty = null;
+      }
+    }
+  }
+
+  if (reassignAdmin && !room.players.some((p) => p.admin)) {
+    const newAdmin = room.players[0];
+    if (newAdmin) {
+      newAdmin.admin = true;
+    }
+  }
+
+  room.count = room.count || MAX_PLAYERS;
+  broadcastRoom(roomId);
 }
 
 function startGame(room, playerId) {
@@ -227,6 +303,19 @@ app.post("/api/rooms/:roomId/players", (req, res, next) => {
     });
     broadcastRoom(roomId);
     res.json({ playerId });
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.delete("/api/rooms/:roomId/players/:playerId", (req, res, next) => {
+  try {
+    const { roomId, playerId } = req.params;
+    const { adminId } = req.body;
+    const room = ensureRoom(roomId);
+    ensureAdmin(room, adminId);
+    removePlayerFromRoom(room, roomId, playerId);
+    res.json({ ok: true });
   } catch (err) {
     next(err);
   }

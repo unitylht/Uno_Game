@@ -33,6 +33,13 @@ export async function joinRoom(roomId, name) {
   });
 }
 
+export async function removePlayerFromRoom(roomId, adminId, playerId) {
+  return request(`/api/rooms/${roomId}/players/${playerId}`, {
+    method: "DELETE",
+    body: JSON.stringify({ adminId }),
+  });
+}
+
 export async function fetchRoom(roomId) {
   return request(`/api/rooms/${roomId}`);
 }

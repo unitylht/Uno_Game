@@ -9,6 +9,9 @@ export default function StartGame({
   playersActive,
   playerId,
   onNewGame,
+  onRemovePlayer,
+  removingPlayerId,
+  currentPlayer,
 }) {
   const { t } = useTranslation();
 
@@ -28,6 +31,9 @@ export default function StartGame({
         playerId={playerId}
         winner={winner}
         onNewGame={onNewGame}
+        onRemovePlayer={onRemovePlayer}
+        removingPlayerId={removingPlayerId}
+        currentUser={currentPlayer}
       />
     );
   }

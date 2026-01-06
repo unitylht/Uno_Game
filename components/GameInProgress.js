@@ -26,6 +26,9 @@ export default function GameInProgress({
   playerId,
   winner,
   onNewGame,
+  onRemovePlayer,
+  removingPlayerId,
+  currentUser,
 }) {
   const { t } = useTranslation();
   const translateOrDefault = (key, fallback) => {
@@ -270,39 +273,61 @@ export default function GameInProgress({
     setControlsCollapsed((prev) => !prev);
   }, []);
 
-  const renderPlayer = (player, isCurrentPlayer, isCompact) => (
-    <>
-      <HeaderPlayer
-        color="white"
-        type="h1"
-        margin="0"
-        marginBottom="1"
-        title={`${player.name} · ${player.cards.length} cards`}
-      >
-        <span
-          className={
-            derived.currentMovePlayer.id === player.id
-              ? "px-3 py-1 rounded text-black font-bold animation bg-yellow-300 shadow"
-              : "opacity-60 px-3 py-1"
-          }
+  const renderPlayer = (player, isCurrentPlayer, isCompact) => {
+    const canRemove =
+      currentUser?.admin && player.id !== currentUser.id && Boolean(onRemovePlayer);
+    const removing = removingPlayerId === player.id;
+    return (
+      <>
+        <HeaderPlayer
+          color="white"
+          type="h1"
+          margin="0"
+          marginBottom="1"
+          title={`${player.name} · ${player.cards.length} cards`}
         >
-          {derived.currentMovePlayer.id === player.id ? <span>👉 </span> : null}
-          {player.name}
-        </span>
-      </HeaderPlayer>
-      <PlayerCards
-        cards={derived.sortedHands[String(player.id)] || []}
-        isCurrentPlayer={isCurrentPlayer}
-        onDiscardACard={onDiscardACard}
-        isCardDisabled={(card) => isCardDisabled(card, player)}
-        onCardAdd={onCardAdd}
-        onCardRemove={onCardRemove}
-        winner={winner}
-        showInline={forceInlineHand || isCurrentPlayer || !isCurrentPlayer}
-        compact={isCompact && !isCurrentPlayer}
-      />
-    </>
-  );
+          <div className="flex items-center gap-2">
+            <span
+              className={
+                derived.currentMovePlayer.id === player.id
+                  ? "px-3 py-1 rounded text-black font-bold animation bg-yellow-300 shadow"
+                  : "opacity-60 px-3 py-1"
+              }
+            >
+              {derived.currentMovePlayer.id === player.id ? <span>👉 </span> : null}
+              {player.name}
+            </span>
+            {canRemove ? (
+              <button
+                onClick={() =>
+                  onRemovePlayer(player.id).catch(() =>
+                    setError(fallbackActionError)
+                  )
+                }
+                disabled={removing}
+                className="text-xs bg-red-700 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-2 py-1 rounded"
+              >
+                {removing
+                  ? translateOrDefault("common:loading", "Removing...")
+                  : translateOrDefault("common:remove", "Remove")}
+              </button>
+            ) : null}
+          </div>
+        </HeaderPlayer>
+        <PlayerCards
+          cards={derived.sortedHands[String(player.id)] || []}
+          isCurrentPlayer={isCurrentPlayer}
+          onDiscardACard={onDiscardACard}
+          isCardDisabled={(card) => isCardDisabled(card, player)}
+          onCardAdd={onCardAdd}
+          onCardRemove={onCardRemove}
+          winner={winner}
+          showInline={forceInlineHand || isCurrentPlayer || !isCurrentPlayer}
+          compact={isCompact && !isCurrentPlayer}
+        />
+      </>
+    );
+  };
 
   const playerOptions = wildCard ? (
     <WildCardOptions

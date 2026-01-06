@@ -1,6 +1,6 @@
 import Layout from "~/components/Layout.js";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import StartGame from "~/components/StartGame";
 import Button from "~/components/Button";
@@ -10,7 +10,7 @@ import Footer from "~/components/Footer";
 import useTranslation from "next-translate/useTranslation";
 import getBaseUrl from "~/utils/getBaseUrl";
 import useRoomSubscription from "~/hooks/useRoomSubscription";
-import { startRoomGame } from "~/utils/apiClient";
+import { removePlayerFromRoom, startRoomGame } from "~/utils/apiClient";
 
 export default function Game() {
   const { t } = useTranslation();
@@ -26,6 +26,8 @@ export default function Game() {
     roomId,
     playerId
   );
+  const [removingPlayerId, setRemovingPlayerId] = useState(null);
+  const [removeError, setRemoveError] = useState(null);
 
   const onNewGame = async (event) => {
     event?.preventDefault?.();
@@ -37,6 +39,25 @@ export default function Game() {
       setStarting(false);
     }
   };
+
+  const onRemovePlayer = async (targetPlayerId) => {
+    if (!roomId || !playerId || !targetPlayerId) return;
+    setRemoveError(null);
+    setRemovingPlayerId(targetPlayerId);
+    try {
+      await removePlayerFromRoom(roomId, playerId, targetPlayerId);
+    } catch (err) {
+      setRemoveError(err?.message || translateOrDefault("common:error", "Error"));
+      throw err;
+    } finally {
+      setRemovingPlayerId(null);
+    }
+  };
+
+  const currentPlayer = useMemo(
+    () => playersActive.find((p) => p.id === playerId),
+    [playersActive, playerId]
+  );
 
   if (!room) {
     return (
@@ -58,6 +79,9 @@ export default function Game() {
           playersActive={playersActive}
           playerId={playerId}
           onNewGame={onNewGame}
+          onRemovePlayer={onRemovePlayer}
+          removingPlayerId={removingPlayerId}
+          currentPlayer={currentPlayer}
         />
       </Main>
     );
@@ -66,6 +90,8 @@ export default function Game() {
     const playersSlots = [];
     for (let i = 0; i < totalSlots; i++) {
       const player = playersActive[i];
+      const canRemove = currentPlayer?.admin && player && player.id !== playerId;
+      const removing = removingPlayerId === player?.id;
       playersSlots.push(
         <li className="py-2 text-gray-100" key={i}>
           <div className="flex items-center gap-2">
@@ -73,6 +99,15 @@ export default function Game() {
               {player ? player.name : t("playerId:waiting-player")}
               {player && player.id === playerId ? t("playerId:you") : null}
             </span>
+            {canRemove ? (
+              <button
+                onClick={() => onRemovePlayer(player.id)}
+                disabled={removing}
+                className="text-xs bg-red-700 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-3 py-1 rounded"
+              >
+                {removing ? t("common:loading") || "Removing..." : t("common:remove") || "Remove"}
+              </button>
+            ) : null}
             {player ? (
               <span className="text-emerald-300" aria-label="Ready">
                 ✅
@@ -85,7 +120,6 @@ export default function Game() {
       );
     }
 
-    const currentPlayer = playersActive.find((p) => p.id === playerId);
     const canStart =
       currentPlayer?.admin &&
       playersActive.length >= 2 &&
@@ -114,6 +148,9 @@ export default function Game() {
               <ol className="divide-y divide-white/10 list-decimal pl-5">
                 {playersSlots}
               </ol>
+              {removeError ? (
+                <p className="text-red-300 text-sm mt-3">{removeError}</p>
+              ) : null}
             </div>
             {currentPlayer && currentPlayer.admin ? (
               <Button
