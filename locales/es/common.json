@@ -12,6 +12,8 @@
   "waiting": "等待中",
   "cards": "张牌",
   "your-hand": "你的手牌",
+  "remove": "移除",
+  "error": "错误",
   "action-error": "操作失败，请重试。",
   "realtime": "实时就绪",
   "instant-room": "即时创建房间",

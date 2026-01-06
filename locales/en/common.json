@@ -12,6 +12,8 @@
   "waiting": "Waiting",
   "cards": "cards",
   "your-hand": "Your hand",
+  "remove": "Remove",
+  "error": "Error",
   "action-error": "Action failed. Please try again.",
   "realtime": "Realtime ready",
   "instant-room": "Instant lobby creation",
