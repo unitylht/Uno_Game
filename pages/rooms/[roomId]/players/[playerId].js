@@ -62,8 +62,9 @@ export default function Game() {
       </Main>
     );
   } else {
+    const totalSlots = room.count || 10;
     const playersSlots = [];
-    for (let i = 0; i < room.count; i++) {
+    for (let i = 0; i < totalSlots; i++) {
       const player = playersActive[i];
       playersSlots.push(
         <li className="py-2 text-gray-100" key={i}>
@@ -85,7 +86,10 @@ export default function Game() {
     }
 
     const currentPlayer = playersActive.find((p) => p.id === playerId);
-    const canStart = currentPlayer?.admin && playersActive.length === room.count;
+    const canStart =
+      currentPlayer?.admin &&
+      playersActive.length >= 2 &&
+      playersActive.length <= totalSlots;
 
     return (
       <Main color="gradient">

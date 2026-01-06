@@ -5,35 +5,47 @@ import Button from "~/components/Button";
 import Main from "~/components/Main";
 import Footer from "~/components/Footer";
 import useTranslation from "next-translate/useTranslation";
-import { createRoom } from "~/utils/apiClient";
+import { createRoom, joinRoom } from "~/utils/apiClient";
 
 export default function NewGame() {
   const { t } = useTranslation();
   const router = useRouter();
-  const [value, setValue] = useState("2");
-  const [name, setName] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [formError, setFormError] = useState("");
+  const [createName, setCreateName] = useState("");
+  const [joinName, setJoinName] = useState("");
+  const [joinRoomCode, setJoinRoomCode] = useState("");
+  const [createSubmitting, setCreateSubmitting] = useState(false);
+  const [joinSubmitting, setJoinSubmitting] = useState(false);
+  const [createError, setCreateError] = useState("");
+  const [joinError, setJoinError] = useState("");
   const tf = (key, fallback) => {
     const text = t(key);
     return !text || text === key ? fallback : text;
   };
-  const onSubmit = (event) => {
+
+  const onCreate = (event) => {
     event.preventDefault();
-    if (submitting) return;
-    const playerCount = Number(value);
-    setSubmitting(true);
-    setFormError("");
-    createRoom(playerCount, name)
-      .then(({ roomId, playerId }) => {
-        router.push(`/rooms/${roomId}/players/${playerId}`);
-      })
-      .catch(() => {
-        setFormError(
-          tf("common:action-error", "Could not create the room right now.")
-        );
-      })
-      .finally(() => setSubmitting(false));
+    if (createSubmitting) return;
+    setCreateSubmitting(true);
+    setCreateError("");
+    createRoom(createName)
+      .then(({ roomId, playerId }) => router.push(`/rooms/${roomId}/players/${playerId}`))
+      .catch(() =>
+        setCreateError(tf("common:action-error", "Could not create the room right now."))
+      )
+      .finally(() => setCreateSubmitting(false));
+  };
+
+  const onJoin = (event) => {
+    event.preventDefault();
+    if (joinSubmitting) return;
+    setJoinSubmitting(true);
+    setJoinError("");
+    joinRoom(joinRoomCode.trim(), joinName)
+      .then(({ playerId }) => router.push(`/rooms/${joinRoomCode.trim()}/players/${playerId}`))
+      .catch(() =>
+        setJoinError(tf("common:action-error", "Could not join the room right now."))
+      )
+      .finally(() => setJoinSubmitting(false));
   };
 
   return (
@@ -45,9 +57,11 @@ export default function NewGame() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <p className="text-sm uppercase tracking-[0.2em] text-gray-300">
-                  {t("common:new-game")}
+                  {tf("common:new-game", "New game")}
                 </p>
-                <h1 className="text-3xl font-bold mt-1">{t("index:submit")}</h1>
+                <h1 className="text-3xl font-bold mt-1">
+                  {tf("index:create-room", "Create new room")}
+                </h1>
               </div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-100 text-sm font-semibold">
                 <span className="h-2 w-2 rounded-full bg-emerald-300 animate-pulse" />
@@ -55,46 +69,24 @@ export default function NewGame() {
               </div>
             </div>
             <p className="text-gray-200 text-sm leading-relaxed mb-8">
-              {t("index:players-number")} · {t("common:nickname")}
+              {tf(
+                "index:create-copy",
+                "Instantly open a lobby and share the 6-digit code or link."
+              )}
             </p>
-            {formError ? (
+            {createError ? (
               <div className="mb-4 p-3 rounded-xl bg-red-500/20 border border-red-400/40 text-sm text-red-100">
-                {formError}
+                {createError}
               </div>
             ) : null}
-            <form onSubmit={onSubmit} className="space-y-6">
-              <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-100">
-                  {t("index:players-number")}
-                </label>
-                <div className="relative">
-                  <select
-                    className="w-full bg-gray-900/60 border border-white/20 rounded-xl py-3 pl-4 pr-10 text-white focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition"
-                    value={value}
-                    onChange={(e) => setValue(e.target.value)}
-                  >
-                    {[...Array(9)].map((_, index) => {
-                      const optionValue = (index + 2).toString();
-                      return (
-                        <option
-                          value={optionValue}
-                          key={optionValue}
-                          className="bg-gray-900 text-white"
-                        >
-                          {optionValue}
-                        </option>
-                      );
-                    })}
-                  </select>
-                </div>
-              </div>
+            <form onSubmit={onCreate} className="space-y-6">
               <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-100">
                   {t("common:nickname")}
                 </label>
                 <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  value={createName}
+                  onChange={(e) => setCreateName(e.target.value)}
                   placeholder={t("common:nickname-holder")}
                   type="text"
                   className="w-full bg-gray-900/60 border border-white/20 rounded-xl py-3 px-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition"
@@ -102,8 +94,10 @@ export default function NewGame() {
                 />
               </div>
               <div className="flex items-center gap-3">
-                <Button type={"submit"} color={"red"} disabled={submitting}>
-                  {submitting ? t("playerId:loading") : t("index:submit")}
+                <Button type={"submit"} color={"red"} disabled={createSubmitting}>
+                  {createSubmitting
+                    ? t("playerId:loading")
+                    : tf("index:create-room", "Create new room")}
                 </Button>
                 <p className="text-xs text-gray-300">
                   {tf("common:instant-room", "Instant lobby creation")} ·{" "}
@@ -116,23 +110,61 @@ export default function NewGame() {
           <div className="space-y-6">
             <div className="bg-black/40 border border-white/5 rounded-2xl p-6 text-white">
               <h3 className="text-lg font-semibold mb-2">
-                {tf("common:how-it-works", "How it works")}
+                {tf("common:join-room", "Join room")}
               </h3>
-              <ol className="list-decimal list-inside text-sm text-gray-200 space-y-1">
-                <li>{tf("common:step-one", "Choose players and a nickname.")}</li>
-                <li>
-                  {tf(
-                    "common:step-two",
-                    "Share the generated lobby link with friends."
-                  )}
-                </li>
-                <li>
-                  {tf(
-                    "common:step-three",
-                    "Play with live turns, wild choices, and anti-cheat guards."
-                  )}
-                </li>
-              </ol>
+              <p className="text-gray-200 text-sm leading-relaxed mb-4">
+                {tf(
+                  "index:join-copy",
+                  "Enter a room code or use a shared link to join a lobby."
+                )}
+              </p>
+              {joinError ? (
+                <div className="mb-4 p-3 rounded-xl bg-red-500/20 border border-red-400/40 text-sm text-red-100">
+                  {joinError}
+                </div>
+              ) : null}
+              <form className="space-y-4" onSubmit={onJoin}>
+                <div>
+                  <label className="block text-sm font-semibold mb-2 text-gray-100">
+                    {tf("common:room-code", "Room code")}
+                  </label>
+                  <input
+                    value={joinRoomCode}
+                    onChange={(e) => setJoinRoomCode(e.target.value)}
+                    placeholder={tf("index:room-code-holder", "e.g. 123456")}
+                    type="text"
+                    pattern="\\d{6}"
+                    className="w-full bg-gray-900/60 border border-white/20 rounded-xl py-3 px-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-2 text-gray-100">
+                    {t("common:nickname")}
+                  </label>
+                  <input
+                    value={joinName}
+                    onChange={(e) => setJoinName(e.target.value)}
+                    placeholder={t("common:nickname-holder")}
+                    type="text"
+                    className="w-full bg-gray-900/60 border border-white/20 rounded-xl py-3 px-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition"
+                    required
+                  />
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <Button
+                    color={"green"}
+                    type={"submit"}
+                    className="w-full"
+                    disabled={joinSubmitting}
+                  >
+                    {joinSubmitting ? t("playerId:loading") : tf("index:join-room", "Join room")}
+                  </Button>
+                  <p className="text-xs text-gray-300 whitespace-nowrap">
+                    {tf("roomId:instant", "Live validation · Shareable link")}
+                  </p>
+                </div>
+              </form>
             </div>
           </div>
         </div>

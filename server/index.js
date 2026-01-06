@@ -22,6 +22,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const MAX_PLAYERS = 10;
+const MIN_PLAYERS = 2;
+
 const rooms = new Map();
 const roomSockets = new Map();
 
@@ -29,7 +32,7 @@ app.get("/", (req, res) => {
   res.json({
     message: "Uno Game API server is running",
     endpoints: {
-      createRoom: "POST /api/rooms { count, name }",
+      createRoom: "POST /api/rooms { name }",
       joinRoom: "POST /api/rooms/:roomId/players { name }",
       roomState: "GET /api/rooms/:roomId",
       start: "POST /api/rooms/:roomId/start { playerId }",
@@ -82,11 +85,19 @@ function ensureRoom(roomId) {
 }
 
 function assertPlayerCount(room) {
-  if (room.players.length >= room.count) {
+  if (room.players.length >= MAX_PLAYERS) {
     const err = new Error("Room is full");
     err.status = 400;
     throw err;
   }
+}
+
+function generateRoomCode() {
+  let code;
+  do {
+    code = String(Math.floor(Math.random() * 900000) + 100000);
+  } while (rooms.has(code));
+  return code;
 }
 
 function resetDeck(room) {
@@ -98,6 +109,11 @@ function startGame(room, playerId) {
   if (!admin) {
     const err = new Error("Only the admin can start the game");
     err.status = 403;
+    throw err;
+  }
+  if (room.players.length < MIN_PLAYERS) {
+    const err = new Error("Need at least two players to start");
+    err.status = 400;
     throw err;
   }
   resetDeck(room);
@@ -148,18 +164,18 @@ function applyPenaltyCards(room, playerIndex, total) {
 
 app.post("/api/rooms", (req, res, next) => {
   try {
-    const { count, name } = req.body;
-    if (!count || !name) {
-      const err = new Error("Missing count or name");
+    const { name } = req.body;
+    if (!name) {
+      const err = new Error("Missing name");
       err.status = 400;
       throw err;
     }
 
-    const roomId = uuid();
+    const roomId = generateRoomCode();
     const playerId = uuid();
     const room = {
       id: roomId,
-      count,
+      count: MAX_PLAYERS,
       playing: false,
       players: [
         {
