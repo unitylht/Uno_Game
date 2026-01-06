@@ -133,7 +133,9 @@ export default function NewGame() {
                     onChange={(e) => setJoinRoomCode(e.target.value)}
                     placeholder={tf("index:room-code-holder", "e.g. 123456")}
                     type="text"
-                    pattern="\\d{6}"
+                    pattern="[0-9]{6}"
+                    inputMode="numeric"
+                    maxLength={6}
                     className="w-full bg-gray-900/60 border border-white/20 rounded-xl py-3 px-4 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition"
                     required
                   />
