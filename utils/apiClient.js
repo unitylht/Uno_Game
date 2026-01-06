@@ -19,10 +19,10 @@ async function request(path, options = {}) {
   return res.json();
 }
 
-export async function createRoom(count, name) {
+export async function createRoom(name) {
   return request("/api/rooms", {
     method: "POST",
-    body: JSON.stringify({ count, name }),
+    body: JSON.stringify({ name }),
   });
 }
 
