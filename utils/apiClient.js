@@ -1,5 +1,14 @@
+function getDefaultApiBaseUrl() {
+  if (typeof window === "undefined") {
+    return "http://localhost:4000";
+  }
+
+  const { hostname, protocol } = window.location;
+  return `${protocol}//${hostname}:4000`;
+}
+
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
+  process.env.NEXT_PUBLIC_API_BASE_URL || getDefaultApiBaseUrl();
 
 const wsBase = API_BASE_URL.replace(/^http/, "ws");
 
